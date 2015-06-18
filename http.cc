@@ -1,9 +1,10 @@
-//==============================================================================
-// Program used to request webpages from domain every nth seconds
-// that tracks the (not really sure that it tracks) and displays
-// the results into a text file on one line
-//
-//==============================================================================
+//============================================================================================================================================
+// Termimal Program used to send http get request from given domain every nth seconds
+// to be used as a network tester to see if there is an internet or DNS failure and stores logs to a text file
+// The parameters are {computer name(used for log file), attempted domain, sleep interval(between requests), timeout value(if request fails)} 
+// The results are placed into a file called <name>REQUESTS.txt which display:
+// REQUEST[nth value], Write function success, get request success,  
+//============================================================================================================================================
 
 #include <iostream>
 #include <fstream>
@@ -14,6 +15,7 @@
 #include <stdlib.h>
 #include <ctime>
 #include <curl/curl.h>
+#include <curl/easy.h>
 #include <sstream>
 #include <stdio.h>
 #include <assert.h>
@@ -60,7 +62,8 @@ void mySleep(int sleepMs){
 }
 
 // total number of requests
-#define REQUESTS 100
+//#define REQUESTS 100
+#define SLEEP 3600
 
 /*function used to change data types from char * to string (makes everthing easier)*/
 std::string translate(char * data){
@@ -68,10 +71,91 @@ std::string translate(char * data){
 }
 
 static size_t printHandle(char * html, size_t size ,size_t nmembm, void * userdata){		
-	
+	// this does nothing
 	return size * nmembm;
 }
 
+static size_t server_data_handler(void *contents, size_t size, size_t nmemb, void *userp){
+	((std::string*)userp)->append((char*)contents, size * nmemb);
+	return size * nmemb;
+}
+
+bool check_remote_server(){
+
+	CURL *curl;
+	CURLcode res;
+	std::string ServerCommand;
+		
+	curl = curl_easy_init();
+	if(curl) {
+		std::cout << "WE ARE IN" << std::endl;
+		if ((res = curl_easy_setopt(curl, CURLOPT_URL, "https://sev-front.firebaseio.com/flag.json")) != CURLE_OK){
+			std::cout << "THERE WAS AN ERROR WITH SETTING THE URL" << std::endl;
+		}
+		if ((res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, server_data_handler)) != CURLE_OK){
+			std::cout << "THERE WAS AN ERROR WITH SETTING THE WRITEFUNCTION" << std::endl;
+		}
+		if ((res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ServerCommand)) != CURLE_OK){
+			std::cout << "THERE WAS AN ERROR SETTING THE WRITE DATA" << std::endl;
+		}
+		if ((res = curl_easy_perform(curl)) != CURLE_OK){
+			std::cout << "THERE WAS AN ERROR PERFORMAING THE GET REQUEST" << std::endl;
+			return true;
+		}
+		curl_easy_cleanup(curl);
+    		//std::cout << "\n\n THE CONTENTS OF THE WEBPAGE ARE: \n\n" << ServerCommand << "\n\n"  << std::endl;
+	}
+	
+	if (ServerCommand == "1"){
+		return true;
+	}
+	else if (ServerCommand == "0"){
+		mySleep(21600); // sleeps for 6 hours
+		check_remote_server(); // then tries to call again
+		return true; // if base case is true then returns true
+	}
+	return true;
+}
+
+int checkKnownDomainIP(std::string domain){
+	
+	std::string IP = "";
+	if(domain == "google.com"){ IP = "74.125.239.137";}	
+	else if(domain == "yahoo.com"){ IP = "206.190.36.45";}
+	else if(domain == "facebook.com"){ IP = "173.252.120.6";}
+	else if(domain == "reddit.com"){ IP = "198.41.209.143";}
+	else if(domain == "twitter.com"){ IP = "199.59.150.39";}
+	else if(domain == "github.com"){ IP = "192.30.252.131";}
+	else if(domain == "amazon.com"){ IP = "205.251.242.103";}
+	else if(domain == "tubmlr.com"){ IP = "66.6.41.30";}
+	else if(domain == "apple.com"){ IP = "17.142.160.59";}
+	else if(domain == "youtube.com"){ IP = "74.125.239.34";}
+	else {
+		std::cout << "IP not available for this domain" << std::endl;
+		return 3;
+	}
+	
+	CURL *curl;
+	CURLcode res;
+	curl = curl_easy_init();
+	if(curl){
+		
+		if((res = curl_easy_setopt(curl, CURLOPT_URL, IP.c_str())) != CURLE_OK){
+			std::cout << "SETTING cURL FAILED" << std::endl;
+		} 
+		if((res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &printHandle)) != CURLE_OK){
+			std::cout << "ERROR setting WRITEFUNCTION in checkKnownDomainIP()" << std::endl;
+		}
+		if((res = curl_easy_perform(curl)) != CURLE_OK){
+			std::cout << "FOR SURE there is no internet then" << std::endl;
+			return 1; // if the IP get request fails there is no internet
+		}
+		curl_easy_cleanup(curl);
+		return 2; // otherwise if IP get request works the DNS doesn't work
+	}
+	return 3; // otherwise CURL was not initialized correctly
+	
+}
 void http_get_request(const std::string & name, const std::string & domain, unsigned & interval, unsigned & timeout){
 	
 	CURL * curl = curl_easy_init(); // intialize curl
@@ -79,11 +163,14 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 	std::ofstream outputfileStream; // declares an output stream
 	std::string outfile = name + "REQUESTS.txt"; // appends `REQUESTS,txt` to file name
 	outputfileStream.open(outfile.c_str()); // creates an outfile with `REQUESTS.txt` extension in current directory
-	unsigned counter = 1; // counter that will keep track of number of http requests sent
-	
+	unsigned counter = 1; // counter that will keep track of number of http requests sent	
+	time_t ltime; /* calendar time */
+	ltime=time(NULL); /* get current cal time */
+	std::string test = asctime( localtime(&ltime) ); // moves time stamp to a string
+	test.erase(std::remove(test.begin(), test.end(), '\n'), test.end()); // erases the \n at the end of the string
 	
 	// ill put condition here to check for web flags later
-	while(1){
+	while(check_remote_server()){
 		
 		char * localIP; // = '\0'; // char * that stores the local IP address
 		char * primaryIP; // = '\0'; // char * that sores the primary IP address
@@ -97,7 +184,10 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 			fprintf(stderr, "curl initialization failure\n"); // if error occurs, prints to stderr
 			outputfileStream << "\n\"curl initialization failure\"\n"; // if error occurs, prints to txt file
 			return;
-		}
+		}/*
+		else { outputfileStream << "\"curl initialization OK\",";}
+		*/
+
 		//=====================================
 		// configure curl member functions here
 		//=====================================
@@ -111,17 +201,20 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 			outputfileStream << "\"" << curl_easy_strerror(res) << "\""; // output same error, but to txt file
 			counter++;
 			continue;
-		}
-		else { outputfileStream << "\"CURLOPT_WRITEFUNCTION is OK\","; }  // if setting print functions is good then print success code and proceed
-
+		}/*
+		else { outputfileStream << "\"CURLOPT_WRITEFUNCTION is OK\","; } 
+		// if setting print functions is good then print success code and proceed
+		*/
+		
 		// sets the URL to be used
 		if ((res = curl_easy_setopt(curl, CURLOPT_URL, domain.c_str())) != CURLE_OK){
 			fprintf(stderr, "%s\n", curl_easy_strerror(res)); // if error occurs, prints to stderr
 			outputfileStream << "\"" << curl_easy_strerror(res) << "\""; // if error occurs prints to txt file
 			counter++;
 			continue;
-		}
+		}/*
 		else {outputfileStream << "\"CURLOPT_URL is OK\",";} // if setting url is good print success code
+		*/
 		
 		// sets up an HTTPGET request
 		if ((res = curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L)) != CURLE_OK){
@@ -129,48 +222,99 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 			outputfileStream << "\"" << curl_easy_strerror(res) << "\""; // if error occurs print to txt file
 			counter++;
 			continue;
-		}
+		}/*
 		else { outputfileStream << "\"HTTP get request OK\",";} // if get request succeeds then proceed	
-		
+		*/
+
 		// sets the timeout variable from paramter
 		if ((res = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout)) != CURLE_OK) {
 			fprintf(stderr, "%s\n", curl_easy_strerror(res)); // if error occurs, prints to stderr
 			outputfileStream << "\"" << curl_easy_strerror(res) << "\""; // if error occurs, print to txt file
 			counter++;
 			continue;
-		}
+		}/*
 		else { outputfileStream << "\"Timeout value OK\",";} // if timeout settings succeed then proceed
-		
+		*/
+	
 		//=====================================
 		// execute the configurations
 		//=====================================
 		// performs the request
 		if ((res = curl_easy_perform(curl)) != CURLE_OK){	
 			
-			/*switch (res){
-        			case CURLE_COULDNT_CONNECT:
-					outputfileStream << "\"" << curl_easy_strerror(res) << "\","; // does the same but prints to txt file
-        				break;
-				case CURLE_COULDNT_RESOLVE_HOST:	
-					outputfileStream << "\"" << curl_easy_strerror(res) << "\","; // does the same but prints to txt file
-        				break;
-				case CURLE_COULDNT_RESOLVE_PROXY:
-					outputfileStream << "\"" << curl_easy_strerror(res) << "\","; // does the same but prints to txt file
-					std::cout << "Internet dose not exist\n";
-					break;
-				default: 
-					break;
-    			}*/	
-			// this is where the error output goes
+			outputfileStream << "\"get request failed\",";
+			// IF THERE IS AN ERROR WITH GET REQUEST THE PRINT A 0
+			outputfileStream << "\"0\",";
+			outputfileStream << "\"" << domain << "\",";
 			
+			// output error to txt file
 			outputfileStream << "\"" << curl_easy_strerror(res) << "\","; // does the same but prints to txt file
-			fprintf(stderr, "%s\n", curl_easy_strerror(res)); // if cannot reslove domain name, print to stdout
-			counter++;
-			mySleep(interval);
+			
+			// compare error codes to find the root of the problem
+			if (res == CURLE_COULDNT_CONNECT){
+				// Failed to connect() to host or proxy, most likely this error is caused b/c of no internet
+				outputfileStream <<"\"" <<  test << "\""; // prints the time stamp
+				outputfileStream.flush();
+			}
+			else if (res == CURLE_COULDNT_RESOLVE_HOST){
+				// Couldn't resolve host. The given remote host was not resolved.	
+				// try known IP
+				std::cout << "THE ERROR IS HERE" << std::endl;
+				
+				outputfileStream <<"\"" <<  test << "\""; // prints the time stamp
+				outputfileStream.flush();
+			}
+			else if (res == CURLE_OPERATION_TIMEDOUT){
+				// Operation timeout. The specified time-out period was reached according to the conditions.
+				outputfileStream <<"\"" <<  test << "\""; // prints the time stamp
+				
+				// ERROR CODES ARE AS FOLLOWS:
+				// 1 = "NO INTERNET CONNECTION"
+				// 2 = "DNS DID NOT RESOLVE IP"
+				// 3 = "CURL WAS NOT INTIALIZED PROPERLY"	
+				int domainStatus = checkKnownDomainIP(domain);
+				if(domainStatus == 1){
+					std::cout << "THERE IS NO INTERNET" << std::endl;
+					
+				}
+				else if (domainStatus == 2){
+					std::cout << "DNS FAILURE" << std::endl;
+					
+				}
+				else if(domainStatus == 3){
+					// curl error here
+				}
+				
+				// do the next tests here
+				std::cout << "TIMEOUT ERROR OCCURED HERE" << std::endl;
+				outputfileStream.flush();
+			}
+			else if (res == CURLE_HTTP_POST_ERROR){
+				//This is an odd error that mainly occurs due to internal confusion.
+				outputfileStream <<"\"" <<  test << "\""; // prints the time stamp
+				outputfileStream.flush();
+			}
+			else {
+				// some other error
+				std::cout << "THIS IS SOME OTHER ERROR" << std::endl;
+				outputfileStream <<"\"" <<  test << "\""; // prints the time stamp
+				outputfileStream.flush();
+			}	
+			
+			//outputfileStream << "\"" << curl_easy_strerror(res) << "\","; // does the same but prints to txt file
+			fprintf(stderr, "%s\n", curl_easy_strerror(res)); // prints the error to stdout
+			counter++; // increments the counter for request number output
+			mySleep(interval); // sleeps for given interval
 			continue;
 		}
-		else {outputfileStream << "\"Domain name resolved\",";} // if domain name resolved, proceed
-		
+		else {
+			outputfileStream << "\"get request OK\",";
+			// SINCE NO ERROR, PRINT A ONE
+			outputfileStream << "\"1\",";
+			outputfileStream << "\"" << domain << "\",";
+			outputfileStream << "\"" << curl_easy_strerror(res) << "\","; // does the same but prints to txt file
+			outputfileStream.flush();	
+		}
 		//==================================
 		// Gets Local and Primary IP address
 		//==================================
@@ -192,18 +336,15 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 			continue; // contine to next iteration of while loop
 		}
 		if (local){ // if attaining local IP address succeeded, print it
-			outputfileStream << "\"Local IP found: " << localIP << "\",";
+			outputfileStream << "\"" << localIP << "\",";
 		}
 		if (primary){ // 	
-			outputfileStream << "\"Primary IP found: " << primaryIP << "\",";
+			outputfileStream << "\"" << primaryIP << "\",";
 		}
 		outputfileStream.flush();
-			
-		time_t ltime; /* calendar time */
-		ltime=time(NULL); /* get current cal time */
-		std::string test = asctime( localtime(&ltime) ); // moves time stamp to a string
-		test.erase(std::remove(test.begin(), test.end(), '\n'), test.end()); // erases the \n at the end of the string
+		// prints out time stamp
 		outputfileStream <<"\"" <<  test << "\""; // prints it out to txt file
+		
 		/*
 		FILE * printFile = fopen(outfile.c_str(), "a+");
 		fprintf(printFile, "Local IP found: %s <---> Primary IP found: %s \n",localIP?localIP:"na", primaryIP?primaryIP:"na");	
@@ -235,6 +376,7 @@ int main(int argc, char * argv[]){
 	unsigned timeout = atoi(argv[4]); // converst char * to int to be used as timeout variable for requests
 	std::string outfile = name + "REQUESTS.txt"; // appends `REQUESTS,txt` to string	
 	http_get_request(name, domain, interval, timeout);
+	// at time t ftp the file to a server. Then delete file and make file again
 	
 	return 0;
 }
