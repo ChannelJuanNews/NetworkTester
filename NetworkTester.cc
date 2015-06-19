@@ -6,6 +6,7 @@
 // REQUEST[nth value], get request success, error code(1 or 0), attempted domain, error result, local IP, primary IP, timestamp   
 //============================================================================================================================================
 
+/* c++ STL includes*/
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -14,13 +15,30 @@
 #include <cstdlib>
 #include <stdlib.h>
 #include <ctime>
-#include <curl/curl.h>
-#include <curl/easy.h>
+#include <time.h>
 #include <sstream>
 #include <stdio.h>
 #include <assert.h>
 #include <stdio.h>
 #include <algorithm>
+#include <iomanip>
+
+/*cURL library includes within this project*/
+#include "curl/include/curl/curl.h"
+#include "curl/include/curl/easy.h"
+
+/*mysql c++ connector includes within this project*/
+#include "mysql-connector/include/mysql_connection.h"
+#include "mysql-connector/include/mysql_driver.h"
+
+/*
+#include "mysql-connector/include/cppconn/driver.h"
+#include "mysql-connector/include/cppconn/exception.h"
+#include "mysql-connector/include/cppconn/resultset.h"
+#include "mysql-connector/include/cppconn/statement.h"
+*/
+
+/*mysql library dependency*/
 #include "/usr/local/mysql/include/mysql.h"
 
 //==========Headers for different OS's for sleep syscall===========
@@ -163,6 +181,13 @@ int checkKnownDomainIP(std::string domain, int timeout){
 	return 3; // otherwise CURL was not initialized correctly
 	
 }
+
+int send_to_mysql_database(std::string fileName){
+	
+	return 0;
+}
+
+
 void http_get_request(const std::string & name, const std::string & domain, unsigned & interval, unsigned & timeout){
 	
 	CURL * curl = curl_easy_init(); // intialize curl
@@ -370,31 +395,53 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 		if (local){ // if attaining local IP address succeeded, print it
 			outputfileStream << "\"" << localIP << "\",";
 		}
-		else {
-			outputfileStream << "\"local IP not found\",";
-		}
 		if (primary){ // 	
 			outputfileStream << "\"" << primaryIP << "\",";
 		}
-		else {
-			outputfileStream << "\"pimary IP not found\",";
-		}
-		outputfileStream.flush();
+		outputfileStream.flush(); // print everything to log file
 		// prints out time stamp
 		outputfileStream <<"\"" <<  test << "\""; // prints it out to txt file
-		
-		/*
-		FILE * printFile = fopen(outfile.c_str(), "a+");
-		fprintf(printFile, "Local IP found: %s <---> Primary IP found: %s \n",localIP?localIP:"na", primaryIP?primaryIP:"na");	
-		*/
 		
 		//==========================================
 		// Sleep for alloted time given in parameter
 		//==========================================
 		mySleep(interval);
-		counter++;
+		counter++; // increment counter for request number
 
-		//mysql connections here
+		int PacificStandardTime = 7; // we are -7 standard time in california
+		int hour = ((time (0)/60/60)-PacificStandardTime) % 24; // mod by 24 to get military time
+		
+
+		//* for now */
+		send_to_mysql_database(name);
+		
+		/* every 6 hours send data to mysql database*/			
+		if((hour%6) == 0){
+			
+			//ERROR CODES BELOW:
+			// 0) error sending file. don't delete file, but keep logging
+			// 1) file sent, delete file and create new one
+			// 2) some other error need to see whats up
+			
+			/*if returns 0 there was an error*/
+			if(send_to_mysql_database(name) == 0){
+			
+				
+			}
+			else if(send_to_mysql_database(name) == 1){
+				// success, delete the CSV file
+				// create new empty CSV file
+				
+			}
+			else if(send_to_mysql_database(name) == 2){
+				// some other error
+				
+			}
+			else {
+				// other error don't know whats up
+			
+			}
+		}	
 	}
 	//=====================================
 	// cleanup the curl stuff
