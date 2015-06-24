@@ -1,14 +1,17 @@
 //============================================================================================================================================
 // Termimal Program used to send http get request from inputted domain every nth seconds
-// to be used as a network tester to see if there is an internet or DNS failure and stores the logs to a text file
+// to be used as an internet/DNS tester to see if there is an internet or DNS failure and stores logs with contextual information to a CSV file
 // The parameters are {computer name(used for log file), attempted domain, sleep interval(between requests), timeout value(if request fails)} 
 // The results are placed into a file called <name>REQUESTS.txt which display:
-// REQUEST[nth value], get request success, error code(1 or 0), attempted domain, error result, local IP, primary IP, timestamp   
+// REQUEST[nth value], get request success/failure, error code(1 or 0), attempted domain, error result, local IP, primary IP, timestamp   
 //============================================================================================================================================
 
 /* c++ STL includes*/
 #include <iostream>
+using std::cout;
+using std::endl;
 #include <fstream>
+using std::ifstream;
 #include <string>
 #include <string.h>
 #include <cstring>
@@ -22,12 +25,26 @@
 #include <stdio.h>
 #include <algorithm>
 #include <iomanip>
+using std::setw;
+using std::left;
+#include <vector>
 
 /*cURL library includes within this project*/
 #include <curl/curl.h>
 #include <curl/easy.h>
 
+/*mysql library c++ includes*/
+#include <mysql/mysql.h>
+#include <mysql/my_global.h>
 /*mysql c++ connector library includes within this project*/
+#include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
+#include <cppconn/exception.h>
+/*mysql database information*/
+#define HOST "localhost"
+#define USERNAME "root"
+#define PASSWORD ""
+#define DATABASE "test"
 
 //==========Headers for different OS's for sleep syscall===========
 #ifdef __APPLE__
@@ -47,7 +64,7 @@
 #endif
 //=================================================================
 
-// custom sleep function used for different operation systems
+/* custom sleep function used for different operation systems*/
 void mySleep(int sleepMs){
 
 	#ifdef LINUX
@@ -89,7 +106,7 @@ static size_t server_data_handler(void *contents, size_t size, size_t nmemb, voi
 
 bool check_remote_server(int timeout){
 
-	CURL *curl;
+	CURL * curl;
 	CURLcode res;
 	std::string ServerCommand;
 		
@@ -98,10 +115,10 @@ bool check_remote_server(int timeout){
 		
 		//std::cout << "WE ARE IN" << std::endl;
 		if ((res = curl_easy_setopt(curl, CURLOPT_URL, "https://sev-front.firebaseio.com/flag.json")) != CURLE_OK){
-			std::cout << "THERE WAS AN ERROR WITH SETTING THE URL FOR THE EQ GET REQUEST" << std::endl;
+			perror("THERE WAS AN ERROR WITH SETTING THE URL FOR THE EQ GET REQUEST");
 		}
 		if ((res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, server_data_handler)) != CURLE_OK){
-			std::cout << "THERE WAS AN ERROR WITH SETTING THE WRITEFUNCTION FOR THE EQ GET REQUEST" << std::endl;
+			perror("THERE WAS AN ERROR WITH SETTING THE WRITEFUNCTION FOR THE EQ GET REQUEST");
 		}
 		if ((res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ServerCommand)) != CURLE_OK){
 			std::cout << "THERE WAS AN ERROR SETTING THE WRITE DATA FUNCTION FOR THE EQ GET REQUEST" << std::endl;
@@ -115,6 +132,10 @@ bool check_remote_server(int timeout){
 		}
 		curl_easy_cleanup(curl);
     		//std::cout << "\n\n THE CONTENTS OF THE WEBPAGE ARE: \n\n" << ServerCommand << "\n\n"  << std::endl;
+	}
+	else {
+		perror("curl failed to initialize");
+		return true;	
 	}
 	
 	if (ServerCommand == "1"){
@@ -171,13 +192,137 @@ int checkKnownDomainIP(std::string domain, int timeout){
 	
 }
 
-int send_to_mysql_database(std::string fileName){
+void parseLogFile(	const std::string & fileName,
+			std::vector<std::string> & RequestNum, std::vector<std::string> & GetRequestStatus,
+			std::vector<std::string> & SuccessCode, std::vector<std::string> & AttemptedDomain, 
+			std::vector<std::string> & ErrorStatus, std::vector<std::string> & LocalIP, 
+			std::vector<std::string> & PrimaryIP, std::vector<std::string> & RequestTime ){
+	
+	const int MAX_CHARS_PER_LINE = 512;
+	const int MAX_TOKENS_PER_LINE = 22;
+	const char * const DELIMITER = ",\"";
+	
+	// create a file-reading object
+	ifstream fin;
+	fin.open(fileName.c_str()); // open a file
+	if (!fin.good()){
+		cout << "File does not exist" << endl; 
+		return; // exit if file not found
+	}
+	// read each line of the file
+	while (!fin.eof()){
+		// read an entire line into memory
+		char buf[MAX_CHARS_PER_LINE];
+		fin.getline(buf, MAX_CHARS_PER_LINE);
+		// parse the line into blank-delimited tokens
+		int n = 0; // a for-loop index
+		// array to store memory addresses of the tokens in buf
+		const char* token[MAX_TOKENS_PER_LINE] = {}; // initialize to 0
+		// parse the line
+		token[0] = strtok(buf, DELIMITER); // first token
+		if (token[0]) { // zero if line is blank 
+			for (n = 1; n < MAX_TOKENS_PER_LINE; n++){
+				token[n] = strtok(0, DELIMITER); // subsequent tokens
+				if (!token[n]) break; // no more tokens
+			}
+		}
+		// process the tokens into respective vectors
+		for (int i = 0; i < n; i++){ // n = #of tokens
+			//cout << "Token[" << i << "] = " << token[i] << endl;
+			
+			if(i == 0){ RequestNum.push_back(token[i]);}
+			if(i == 3){ GetRequestStatus.push_back(token[i]);}
+			if(i == 6){ SuccessCode.push_back(token[i]); }
+			if(i == 9){ AttemptedDomain.push_back(token[i]);}
+			if(i == 12){ ErrorStatus.push_back(token[i]);}
+			if(i == 15){ LocalIP.push_back(token[i]);}
+			if(i == 18){ PrimaryIP.push_back(token[i]);}
+			if(i == 21){ RequestTime.push_back(token[i]);}
+		}
+		//cout << endl;
+	}	
+}
 
-
-
-
-
+int send_to_mysql_database(std::string fileName, std::string url, std::string user, std::string pass, std::string database){
+	
+	if (url == ""){url = HOST;}
+	if(user == ""){user = USERNAME;}
+	if(pass == ""){pass = PASSWORD;}
+	if(database == ""){database = DATABASE;}
+	
+	try {	
+		MYSQL *conn, mysql;
+		MYSQL_RES *res;
+		MYSQL_ROW row;
+		int query_state; // user for error detection
 		
+		/*declare the vectors to hold all log info*/
+		std::vector<std::string> RequestNum;
+		std::vector<std::string> GetRequestStatus;
+		std::vector<std::string> SuccessCode;	
+		std::vector<std::string> AttemptedDomain;
+		std::vector<std::string> ErrorStatus;
+		std::vector<std::string> LocalIP;
+		std::vector<std::string> PrimaryIP;
+		std::vector<std::string> RequestTime;
+		
+		std::cout << "WE ARE ABOUT THE PARSE THE LOG FILE" << endl;
+		/*parse the log file and send info into respective vectors*/	
+		parseLogFile(fileName, RequestNum, GetRequestStatus, SuccessCode, AttemptedDomain, ErrorStatus, LocalIP, PrimaryIP, RequestTime);
+		
+		mysql_init(&mysql);
+		conn = mysql_real_connect(&mysql, HOST, USERNAME, PASSWORD, DATABASE, 0, 0, 0);
+		if(conn == NULL) {
+			cout << mysql_error(&mysql) << endl << endl;
+			return 1;
+		}
+		query_state = mysql_query(conn, "select * from NetworkTester");
+		if(query_state != 0) {
+			cout << mysql_error(conn) << endl << endl;
+			return 1;
+		}
+		res = mysql_store_result(conn);
+		cout << "MySQL Values in the NetworkTester Table." << endl << endl;
+		while((row = mysql_fetch_row(res)) != NULL){
+			cout << left;
+			cout << setw(18) << row[0] << setw(18) << row[1] << setw(18) << row[2] << setw(18) << row[3]<<endl;
+		}
+		cout << endl << endl;	
+		
+		for(unsigned i = 0; i < RequestNum.size(); i++){
+			std::string MYSQLinsert = "insert into NetworkTester (RequestNumber, RequestStatus, SuccessCode, AttemptedDomain, ErrorMessage, LocalIP, PrimaryIP, RequestTime) "; 
+			std::string MYSQLVal = MYSQLinsert + "values ('" + RequestNum[i] + "', '" + GetRequestStatus[i] + "',";
+			std::string MYSQLVal1 = MYSQLVal + SuccessCode[i] + ", '" + AttemptedDomain[i] + "', '" + ErrorStatus[i] + "', '" + LocalIP[i] + "', '";
+			std::string MYSQLVal2 = MYSQLVal1 +  PrimaryIP[i] +  "', '" + RequestTime[i] + "')";
+			query_state = mysql_query(conn, MYSQLVal2.c_str());
+			
+			if(query_state == 0){
+				cout << "Success sending query!" << endl;
+			}
+			else if (query_state == 1){
+				// there was a faulire sending the query
+				cout << "Error sending query" << endl;	
+				mysql_free_result(res);
+				mysql_close(conn);
+				return 1;
+			}
+			else {
+				cout << "Something weird happened" << endl;
+				mysql_free_result(res);
+				mysql_close(conn);
+				return 2;
+			}
+		}
+		
+		mysql_free_result(res);
+		mysql_close(conn);
+	
+	}
+	catch (sql::SQLException &e) {
+		cout << "# ERR: " << e.what();
+		cout << " (MySQL error code: " << e.getErrorCode();
+		cout << ", SQLState: " << e.getSQLState() << " )" << endl;
+	}
 	return 0;
 }
 
@@ -216,6 +361,7 @@ std::string getCurrentTime(std::string & currTime){
 	convertIntToString(Sec, currTime);
 	return currTime;	
 }
+
 void http_get_request(const std::string & name, const std::string & domain, unsigned & interval, unsigned & timeout){
 	
 	CURL * curl = curl_easy_init(); // intialize curl
@@ -429,10 +575,10 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 		if (primary){ // 	
 			outputfileStream << "\"" << primaryIP << "\" , ";
 		}
-		outputfileStream.flush(); // print everything to log file
 		// prints out time stamp
 		outputfileStream <<"\"" <<  test << "\""; // prints it out to txt file
-		
+		outputfileStream.flush(); // print everything to log file
+			
 		//==========================================
 		// Sleep for alloted time given in parameter
 		//==========================================
@@ -441,38 +587,42 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 
 		int PacificStandardTime = 7; // we are -7 standard time in california
 		int hour = ((time (0)/60/60)-PacificStandardTime) % 24; // mod by 24 to get military time
-		
 
-		//* for now */
-		send_to_mysql_database(name);
-		
+		//* for now PARAMS: filename, url, username, password, database */
+			
 		/* every 6 hours send data to mysql database*/			
 		if((hour%6) == 0){
-			
+			cout << "NOW IS THE TIME" << endl;
 			//ERROR CODES BELOW:
-			// 0) error sending file. don't delete file, but keep logging
-			// 1) file sent, delete file and create new one
+			// 0) file sent, delete file and create new one
+			// 1) error sending file. don't delete file, but keep logging
 			// 2) some other error need to see whats up
-			
+			// send_to_mysql_database(std::string fileName, std::string url, std::string user, std::string pass, std::string database){
 			/*if returns 0 there was an error*/
-			if(send_to_mysql_database(name) == 0){
-			
-				
-			}
-			else if(send_to_mysql_database(name) == 1){
+			if(send_to_mysql_database(outfile, "", "", "", "") == 0){
 				// success, delete the CSV file
-				// create new empty CSV file
-				
+				// create new file with the same name
+				outputfileStream.close();
+				if(remove(outfile.c_str())!= 0){
+					perror("Error deleting file!");
+					outputfileStream.open(outfile.c_str());
+					continue;
+				}	
+				else {
+					cout << "We have successfully removed the file!" << endl;
+				}
+				outputfileStream.open(outfile.c_str());
 			}
-			else if(send_to_mysql_database(name) == 2){
+			else if(send_to_mysql_database(outfile, "", "", "", "") == 1){
+				// there was an error, don't delete file, keep logging
+				continue;
+			}
+			else if(send_to_mysql_database(outfile, "", "", "", "") == 2){
 				// some other error
-				
+				perror("there was some unforseen error sending data to mysql database");
+				continue;
 			}
-			else {
-				// other error don't know whats up
-			
-			}
-		}	
+		}
 	}
 	//=====================================
 	// cleanup the curl stuff

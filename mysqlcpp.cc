@@ -1,3 +1,8 @@
+//============================================================
+// A simple mysql insertion from a file to a databse using c++
+//============================================================
+
+
 /*C++ STL includes*/
 #include <fstream>
 using std::ifstream;
@@ -33,12 +38,6 @@ using std::left;
 #define PASSWORD ""
 #define DATABASE "test"
 
-/*error handling function for mysql*/
-void finish_with_error(MYSQL *con){
-	fprintf(stderr, "%s\n", mysql_error(con));
-	mysql_close(con);
-	exit(1);        
-}	
 
 void printVector(std::vector<std::string> & v){
 
@@ -153,7 +152,15 @@ int main(int argc, char * argv[]){
 			std::string MYSQLVal2 = MYSQLVal1 +  PrimaryIP[i] +  "', '" + RequestTime[i] + "')";
 			query_state = mysql_query(conn, MYSQLVal2.c_str());
 			
-			
+			if(query_state == 0){
+				cout << "Success sending query!" << endl;
+			}
+			else if (query_state == 1){
+				cout << "Error sending query" << endl;
+			}
+			else {
+				cout << "Something weird happened" << endl;
+			}
 		}
 		
 		mysql_free_result(res);
