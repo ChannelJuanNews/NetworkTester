@@ -2,6 +2,8 @@
 // A simple mysql insertion from a file to a databse using c++
 //============================================================
 
+/* NOTE!!! YOU WILL NEED A FILE CALLED juanREQUESTS.csv IN ORDER FOR THIS TO WORK!!!!*/
+
 
 /*C++ STL includes*/
 #include <fstream>
