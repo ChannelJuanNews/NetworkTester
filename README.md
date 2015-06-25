@@ -65,3 +65,4 @@ the MySQL c++ connector libraries then it won't be hard to just read over the co
 Honestly I don't know if many people can contribute to this project because it is a small project and it doesn't need much attention
 from a lot of people, but if you feel like you can contribute or help out, PLEASE feel free to fork this repo, change whatever you feel needs
 to be changed, and then issue a pull request. Chances are that I will most likely accept the changes :)
+

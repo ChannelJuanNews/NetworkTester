@@ -27,7 +27,9 @@ GUIex = simpleGUI # this si the name of our GUI executable which is a basic exam
 RMBIN = rm -rfv bin 
 MKBIN = mkdir bin
 
-all: NT CT MYSQLT GT
+NTGUIflags = g++ NTGUI.cc -o RunNetworkTesterGUI `pkg-config gtkmm-3.0 --cflags --libs`
+
+all: NT CT MYSQLT GT NTGUI
 	
 NT:
 	
@@ -48,6 +50,9 @@ MYSQLT:
 GT:
 	cd $(src) && $(CXX) $(GUIflags) $(GUIsrc) -o $(GUIex)
 	cd $(src) && mv $(GUIex) ../bin
+NTGUI:
+	cd $(src) && $(NTGUIflags)
+	cd $(src) && mv RunNetworkTesterGUI ../bin
 
 clean: 
 	$(RMDIR)
