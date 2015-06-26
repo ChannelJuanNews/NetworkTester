@@ -26,6 +26,8 @@ GUIex = simpleGUI # this si the name of our GUI executable which is a basic exam
 
 RMBIN = rm -rfv bin 
 MKBIN = mkdir bin
+MKCSVBIN = mkdir CSVbin
+RMCSVBIN = rm -rf CSVbin
 
 NTGUIflags = g++ NTGUI.cc -o RunNetworkTesterGUI `pkg-config gtkmm-3.0 --cflags --libs`
 
@@ -35,6 +37,9 @@ NT:
 	
 	$(RMBIN)
 	$(MKBIN)
+	
+	$(RMCSVBIN)
+	$(MKCSVBIN)
 
 	cd $(src) && $(CXX) $(mySQLconfigFlags) $(mySQLlibFlags) $(mySQLheaderLocation) $(mySQLcppconnLocation) $(cppconnflags) $(cURLflags) $(NTsrc) -o $(BashNetworkTesterEx) 
 	cd $(src) && mv $(BashNetworkTesterEx) ../bin

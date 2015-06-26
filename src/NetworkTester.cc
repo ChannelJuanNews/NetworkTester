@@ -376,7 +376,7 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 	//test.erase(std::remove(test.begin(), test.end(), '\n'), test.end()); // erases the \n at the end of the string
 	test = getCurrentTime(test);
 	
-	
+	bool SendToDatabase = true;
 	
 	// ill put condition here to check for web flags later
 	while(check_remote_server(timeout)){
@@ -587,12 +587,19 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 
 		int PacificStandardTime = 7; // we are -7 standard time in california
 		int hour = ((time (0)/60/60)-PacificStandardTime) % 24; // mod by 24 to get military time
-
+		
+		// one hour after we send to mysql database we
+		// now set our second variable to true so we are able to send to database 5 hours after
+		// for a total of 6 hours	
+		if((hour % 7) == 0){
+			SendToDatabase = true;
+		}
+		
 		//* for now PARAMS: filename, url, username, password, database */
-			
 		/* every 6 hours send data to mysql database*/			
-		if((hour%6) == 0){
+		if((hour%6) == 0 && SendToDatabase){
 			cout << "NOW IS THE TIME" << endl;
+			SendToDatabase = false; // that way it only uploads once!
 			//ERROR CODES BELOW:
 			// 0) file sent, delete file and create new one
 			// 1) error sending file. don't delete file, but keep logging

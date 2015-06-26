@@ -1,7 +1,6 @@
 #ifndef _CALL_NETWORK_TESTER_
 #define _CALL_NETWORK_TESTER_
 
-
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <sys/types.h>
@@ -9,32 +8,24 @@
 #include <string>
 #include <cstring>
 #include <string.h>
+#include <iostream>
 
 int callNetworkTester(){
 	
-	char * my_args[4];
-	pid_t pid;
-	
-	my_args[0] = "juan";
-	my_args[1] = "google.com";
-	my_args[2] = "2";
-	my_args[3] = "5";
-
-	switch ((pid = fork())){
-		case -1:
-			/* Fork() has failed */
-			perror ("fork");
-			return -1;
-			break;
-		case 0:
-			/* This is processed by the child */
-			execv ("NetworkTester", my_args);
-			return -1;
-			break;
-		default:
-			/* This is processed by the parent */
-			break;
+	char * my_args[6];
+	//pid_t pid;
+	char * path = "/Users/JuanRuelas/Desktop/NetworkTester/bin";
+	my_args[1] = "juan";
+	my_args[2] = "google.com";
+	my_args[3] = "2";
+	my_args[4] = "5"; 
+	my_args[5] = NULL;
+		
+	std::cout << "WE ARE ABOUT TO EXECUTE" << std::endl << std::flush;
+	if(execvP("NetworkTester",path, my_args) == -1){
+		std::cout << "THERE WAS AN ERROR EXECTUING OUR PROGRAM" << std::endl;
 	}
+	
 	return 0;
 }
 #endif
