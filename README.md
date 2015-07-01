@@ -60,6 +60,14 @@ That will then connect to google.com every 5 seconds with a timeout value of 10 
 than on just the command line. It will also soon have cleaner code so if anyone is interested in learning how to use the cURL c++ library or
 the MySQL c++ connector libraries then it won't be hard to just read over the code and learn. 
 
+**Early GUI Development**
+![ScreenShot](ScreenShots/SC1.png?raw=true "ScreenShot1")
+![ScreenShot](ScreenShots/SC2.png?raw=true "ScreenShot1")
+![ScreenShot](ScreenShots/SC3.png?raw=true "ScreenShot1")
+
+Since the Qt GUI libraries are being used to develop the GUI, there might be a movement to move all existing code in the `src` 
+folder into the Qt `src` files. 
+
 ##Contributing
 
 Honestly I don't know if many people can contribute to this project because it is a small project and it doesn't need much attention
