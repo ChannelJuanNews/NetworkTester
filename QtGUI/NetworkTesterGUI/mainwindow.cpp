@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
-//#include "NetworkTester.h"
+#include "NetworkTester.h"
 
 /*constructor function*/
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow){
@@ -28,13 +28,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->EmailEdit->setPlaceholderText("example@email.com");
     ui->DisplayLogsCheck->setChecked(true); // by default sets as a check
 
+    // set LogMessage background color
+    QPalette p = ui->LogMessage->palette();
+    p.setColor(QPalette::Base, QColor(240, 240, 255));
+    ui->LogMessage->setPalette(p);
+
+    ui->LogMessage->setAcceptDrops(false); //
+    ui->LogMessage->setEnabled(false); // makes is so you can't edit the logs
+    ui->LogMessage->setTextColor(QColor(0,0,255,127)); // makes a semi-transparent blue
+    ui->LogMessage->setStyleSheet("QTextEdit { padding-left:5; padding-top:5; padding-bottom:5; padding-right:5}");
+
 
 }
 
 MainWindow::~MainWindow(){
     delete ui;
 }
-
+void MainWindow::sendMessage(QString message){
+    QString cat = ui->LogMessage->toPlainText();
+    ui->LogMessage->setText(message + cat);
+    std::cout << "we are here" << std::endl;
+}
 /*GLOBAL VARIABLES TO ORQUESTRATE THE GUI*/
 //====================================
 std::string AttemptingDomain = ""; //NOTNULL
@@ -43,35 +57,73 @@ std::string RequestInterval = ""; //NOTNULL
 std::string TimeoutValue = ""; //NOTNULL
 std::string HOST = ""; //NOTNULL
 std::string USERNAME = ""; //NOTNULL
-std::string PASSWORD = ""; // can be null
 std::string DATABASE = ""; // NOTNULL
-int DomainChanges = 0;
-int NameChanges = 0;
-int RequestChanges = 0;
-int IntervalChanges = 0;
-int HostChanges = 0;
-int UsernameChanges = 0;
-int PasswordChanges = 0;
-int DatabaseChanges = 0;
+
+std::string PASSWORD = ""; // can be null
+std::string email = ""; // can be null
+
 bool loggingStarted = false;
 bool displayLogs = true;
+bool NotifyEmail = false;
 //=====================================
 
-
 /* function that executes the actual program*/
-void executeStuff(){
+void MainWindow::executeStuff(){
     // check to see if the inputted stuff is valid
-    // if valid continue
-    // else try inputting again
-    std::cout << "WE ARE ABOUT TO RUN THE MAIN PROGRAM!!" << std::endl;
+    QMessageBox msgBox;
+    if(AttemptingDomain == ""){
+        msgBox.setText("Domain is not valid");
+        msgBox.exec();
+        return;
+    }
+    if (NameOfComputer == ""){
+        msgBox.setText("Name is not valid");
+        msgBox.exec();
+        return;
+    }
+    if(RequestInterval == ""){
+        msgBox.setText("Request interval is not valid");
+        msgBox.exec();
+        return;
+    }
+    if(TimeoutValue == ""){
+        msgBox.setText("Timeout value is not valid");
+        msgBox.exec();
+        return;
+    }
+    if(HOST == ""){
+        msgBox.setText("Host it not valid");
+        msgBox.exec();
+        return;
+    }
+    if(USERNAME == ""){
+        msgBox.setText("Username is not valid");
+        msgBox.exec();
+        return;
+    }
+    if(DATABASE == ""){
+        msgBox.setText("Database it not valid");
+        msgBox.exec();
+        return;
+    }
+
+    if((ui->EmailEdit->text() != "") && !(ui->AlertIfErrorCheckBox->isChecked())){
+        QMessageBox msgBox;
+        msgBox.setText("Please check the \"Alert if error occurs\" box and try again");
+        msgBox.exec();
+        return;
+    }
+    if(NotifyEmail){
+        email = ui->EmailEdit->text().toStdString();
+    }
+    //std::cout << "The email is: " << email << std::endl;
+    //std::cout << "WE ARE ABOUT TO RUN THE MAIN PROGRAM!!" << std::endl;
+    InitializeNetworkTester(this,AttemptingDomain, NameOfComputer, RequestInterval, TimeoutValue, HOST, USERNAME, DATABASE, PASSWORD, email);
     loggingStarted = true;
 }
-
 //=====================
 /*Signal Handlers*/
 //=====================
-
-
 //**** PROGRESS BAR ****
 void MainWindow::on_progressBar_valueChanged(int value){
     if(AttemptingDomain == ""){
@@ -172,7 +224,7 @@ void MainWindow::on_TimeoutSlider_sliderPressed(){
 //**** CHECKBOXES *******
 void MainWindow::on_DisplayLogsCheck_clicked(bool checked){
     if(!ui->DisplayLogsCheck->isChecked()){
-       QMessageBox msgBox;
+        QMessageBox msgBox;
         msgBox.setText("HA! You can't disable this feature");
         msgBox.exec();
         displayLogs = true;
@@ -202,6 +254,8 @@ void MainWindow::on_AlertIfErrorCheckBox_clicked(){
                 msgBox2.exec();
                 ui->AlertIfErrorCheckBox->setChecked(false);
                 ui->EmailEdit->setText("");
+                email = ui->EmailEdit->text().toStdString();
+                NotifyEmail = false;
                 break;
             case QMessageBox::No:
                 // do nothing
@@ -215,22 +269,23 @@ void MainWindow::on_AlertIfErrorCheckBox_clicked(){
         QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"), tr("Email:"), QLineEdit::Normal, QDir::home().dirName(), &ok);
             if (ok && !text.isEmpty()){
                 ui->EmailEdit->setText(text);
+                email = ui->EmailEdit->text().toStdString();
+                NotifyEmail = true;
             }
             else {
                 ui->AlertIfErrorCheckBox->setChecked(false);
                 ui->EmailEdit->setText("");
+                email = ui->EmailEdit->text().toStdString();
+                NotifyEmail = false;
             }
     }
 }
-
-
 //**** BUTTONS ******
 void MainWindow::on_StopLoggingButton_clicked(){
     QMessageBox msgBox;
     if(loggingStarted == false){
         msgBox.setText("You have not started logging yet");
         msgBox.exec();
-
     }
     else {
         msgBox.setText("You are currently logging");
@@ -245,7 +300,8 @@ void MainWindow::on_StopLoggingButton_clicked(){
                 msgBox2.setText("You have stopped logging");
                 msgBox2.exec();
                 loggingStarted = false;
-                std::cout << "WE STOPPED LOGGING!" << std::endl;
+                //std::cout << " WE STOPPED LOGGING!" << std::endl;
+                sendMessage(" We have stopped logging");
                 break;
             case QMessageBox::No:
                 // do nothing
@@ -278,6 +334,7 @@ void MainWindow::on_ApplyChangesButton_clicked(){
                 msgBox2.setText("Your changes have been applied");
                 msgBox2.exec();
                 executeStuff();
+                sendMessage("Logging started\n");
                 break;
             case QMessageBox::No:
                 msgBox2.setText("Okay, you have made no changes");
@@ -286,20 +343,6 @@ void MainWindow::on_ApplyChangesButton_clicked(){
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

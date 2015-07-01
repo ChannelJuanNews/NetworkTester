@@ -1,15 +1,5 @@
 #ifndef NETWORKTESTER_H
 #define NETWORKTESTER_H
-
-
-//============================================================================================================================================
-// Termimal Program used to send http get request from inputted domain every nth seconds
-// to be used as an internet/DNS tester to see if there is an internet or DNS failure and stores logs with contextual information to a CSV file
-// The parameters are {computer name(used for log file), attempted domain, sleep interval(between requests), timeout value(if request fails)}
-// The results are placed into a file called <name>REQUESTS.txt which display:
-// REQUEST[nth value], get request success/failure, error code(1 or 0), attempted domain, error result, local IP, primary IP, timestamp
-//============================================================================================================================================
-
 /* c++ STL includes*/
 #include <iostream>
 using std::cout;
@@ -17,6 +7,7 @@ using std::endl;
 #include <fstream>
 using std::ifstream;
 #include <string>
+using std::string;
 #include <string.h>
 #include <cstring>
 #include <cstdlib>
@@ -33,22 +24,10 @@ using std::setw;
 using std::left;
 #include <vector>
 
-/*cURL library includes within this project*/
-#include <curl/curl.h>
-#include <curl/easy.h>
 
-/*mysql library c++ includes*/
-#include <mysql/mysql.h>
-#include <mysql/my_global.h>
-/*mysql c++ connector library includes within this project*/
-#include <cppconn/statement.h>
-#include <cppconn/prepared_statement.h>
-#include <cppconn/exception.h>
-/*mysql database information*/
-#define HOST "localhost"
-#define USERNAME "root"
-#define PASSWORD ""
-#define DATABASE "test"
+/*c++ cURL library includes*/
+#include <curl/curl.h>
+#include <curl/curl.h>
 
 //==========Headers for different OS's for sleep syscall===========
 #ifdef __APPLE__
@@ -89,9 +68,15 @@ void mySleep(int sleepMs){
      #endif
 }
 
-// total number of requests
-// #define REQUESTS 100
-#define SLEEP 3600
+
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include <QMessageBox>
+#include <QPixmap>
+#include <QtGui>
+#include <QInputDialog>
+
 
 /*function used to change data types from char * to string (makes everthing easier)*/
 std::string translate(char * data){
@@ -171,7 +156,7 @@ int checkKnownDomainIP(std::string domain, int timeout){
         return 3;
     }
 
-    CURL *curl;
+    CURL * curl;
     CURLcode res;
     curl = curl_easy_init();
     if(curl){
@@ -247,88 +232,6 @@ void parseLogFile(	const std::string & fileName,
     }
 }
 
-int send_to_mysql_database(std::string fileName, std::string url, std::string user, std::string pass, std::string database){
-
-    if (url == ""){url = HOST;}
-    if(user == ""){user = USERNAME;}
-    if(pass == ""){pass = PASSWORD;}
-    if(database == ""){database = DATABASE;}
-
-    try {
-        MYSQL *conn, mysql;
-        MYSQL_RES *res;
-        MYSQL_ROW row;
-        int query_state; // user for error detection
-
-        /*declare the vectors to hold all log info*/
-        std::vector<std::string> RequestNum;
-        std::vector<std::string> GetRequestStatus;
-        std::vector<std::string> SuccessCode;
-        std::vector<std::string> AttemptedDomain;
-        std::vector<std::string> ErrorStatus;
-        std::vector<std::string> LocalIP;
-        std::vector<std::string> PrimaryIP;
-        std::vector<std::string> RequestTime;
-
-        std::cout << "WE ARE ABOUT THE PARSE THE LOG FILE" << endl;
-        /*parse the log file and send info into respective vectors*/
-        parseLogFile(fileName, RequestNum, GetRequestStatus, SuccessCode, AttemptedDomain, ErrorStatus, LocalIP, PrimaryIP, RequestTime);
-
-        mysql_init(&mysql);
-        conn = mysql_real_connect(&mysql, HOST, USERNAME, PASSWORD, DATABASE, 0, 0, 0);
-        if(conn == NULL) {
-            cout << mysql_error(&mysql) << endl << endl;
-            return 1;
-        }
-        query_state = mysql_query(conn, "select * from NetworkTester");
-        if(query_state != 0) {
-            cout << mysql_error(conn) << endl << endl;
-            return 1;
-        }
-        res = mysql_store_result(conn);
-        cout << "MySQL Values in the NetworkTester Table." << endl << endl;
-        while((row = mysql_fetch_row(res)) != NULL){
-            cout << left;
-            cout << setw(18) << row[0] << setw(18) << row[1] << setw(18) << row[2] << setw(18) << row[3]<<endl;
-        }
-        cout << endl << endl;
-
-        for(unsigned i = 0; i < RequestNum.size(); i++){
-            std::string MYSQLinsert = "insert into NetworkTester (RequestNumber, RequestStatus, SuccessCode, AttemptedDomain, ErrorMessage, LocalIP, PrimaryIP, RequestTime) ";
-            std::string MYSQLVal = MYSQLinsert + "values ('" + RequestNum[i] + "', '" + GetRequestStatus[i] + "',";
-            std::string MYSQLVal1 = MYSQLVal + SuccessCode[i] + ", '" + AttemptedDomain[i] + "', '" + ErrorStatus[i] + "', '" + LocalIP[i] + "', '";
-            std::string MYSQLVal2 = MYSQLVal1 +  PrimaryIP[i] +  "', '" + RequestTime[i] + "')";
-            query_state = mysql_query(conn, MYSQLVal2.c_str());
-
-            if(query_state == 0){
-                cout << "Success sending query!" << endl;
-            }
-            else if (query_state == 1){
-                // there was a faulire sending the query
-                cout << "Error sending query" << endl;
-                mysql_free_result(res);
-                mysql_close(conn);
-                return 1;
-            }
-            else {
-                cout << "Something weird happened" << endl;
-                mysql_free_result(res);
-                mysql_close(conn);
-                return 2;
-            }
-        }
-
-        mysql_free_result(res);
-        mysql_close(conn);
-
-    }
-    catch (sql::SQLException &e) {
-        cout << "# ERR: " << e.what();
-        cout << " (MySQL error code: " << e.getErrorCode();
-        cout << ", SQLState: " << e.getSQLState() << " )" << endl;
-    }
-    return 0;
-}
 
 void convertIntToString(int Number, std::string & Result){
 
@@ -601,16 +504,16 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 
         //* for now PARAMS: filename, url, username, password, database */
         /* every 6 hours send data to mysql database*/
-        if((hour%6) == 0 && SendToDatabase){
+        /*if((hour%6) == 0 && SendToDatabase){
             cout << "NOW IS THE TIME" << endl;
             SendToDatabase = false; // that way it only uploads once!
-            //ERROR CODES BELOW:
+            *///ERROR CODES BELOW:
             // 0) file sent, delete file and create new one
             // 1) error sending file. don't delete file, but keep logging
             // 2) some other error need to see whats up
             // send_to_mysql_database(std::string fileName, std::string url, std::string user, std::string pass, std::string database){
             /*if returns 0 there was an error*/
-            if(send_to_mysql_database(outfile, "", "", "", "") == 0){
+            /*if(send_to_mysql_database(outfile, "", "", "", "") == 0){
                 // success, delete the CSV file
                 // create new file with the same name
                 outputfileStream.close();
@@ -633,7 +536,7 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
                 perror("there was some unforseen error sending data to mysql database");
                 continue;
             }
-        }
+        }*/
     }
     //=====================================
     // cleanup the curl stuff
@@ -642,25 +545,19 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
     curl_easy_cleanup(curl); // cleans up curl
 }
 
-int BeginNetworkTesting(int argc, char * argv[]){
+void foo(){
 
-    // name, domain, interval
-    if (argc < 5 || argc > 5){ // makes sure that the right parameters were used
-        std::cout << "You did not input the right parameters, try again\n";
-        return -1;
-    }
-    std::string name = translate(argv[1]);  // makes the `name` parameter a string
-    std::string domain = translate(argv[2]); // makes the `domain` parameter a string
-    unsigned interval = atoi(argv[3]); // converts char * to int to be used as a sleep timer
-    unsigned timeout = atoi(argv[4]); // converst char * to int to be used as timeout variable for requests
-    std::string outfile = name + "REQUESTS.csv"; // appends `REQUESTS,txt` to string
-    http_get_request(name, domain, interval, timeout);
-    // at time t ftp the file to a server. Then delete file and make file again
-    return 0;
+    mySleep(10);
 }
 
-
-
+void InitializeNetworkTester(MainWindow * ui, string domain, string name, string interval,
+                             string timeout, string host, string user, string database, string password, string email){
+    string fileName = name + "REQUESTS.csv";
+    unsigned INTERVAL = atoi(interval.c_str());
+    unsigned TIMEOUT = atoi(timeout.c_str());
+    //http_get_request(fileName,domain, INTERVAL, TIMEOUT);
+    return;
+}
 
 #endif // NETWORKTESTER_H
 

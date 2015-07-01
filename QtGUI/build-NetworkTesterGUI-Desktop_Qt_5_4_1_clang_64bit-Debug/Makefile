@@ -14,7 +14,7 @@ CC            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefau
 CXX           = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 DEFINES       = -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
-CXXFLAGS      = -pipe -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
+CXXFLAGS      = -pipe -std=c++11 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
 INCPATH       = -I../NetworkTesterGUI -I. -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Versions/5/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AGL.framework/Headers -I. -I/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/macx-clang -F/Users/JuanRuelas/Qt/5.4/clang_64/lib
 QMAKE         = /Users/JuanRuelas/Qt/5.4/clang_64/bin/qmake
 DEL_FILE      = rm -f
@@ -36,7 +36,7 @@ DISTNAME      = NetworkTesterGUI1.0.0
 DISTDIR = /Users/JuanRuelas/Desktop/Projects/NetworkTester/QtGUI/NetworkTesterGUI/.tmp/NetworkTesterGUI1.0.0
 LINK          = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 LFLAGS        = -headerpad_max_install_names -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -mmacosx-version-min=10.7 -Wl,-rpath,/Users/JuanRuelas/Qt/5.4/clang_64/lib
-LIBS          = $(SUBLIBS) -F/Users/JuanRuelas/Qt/5.4/clang_64/lib -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL 
+LIBS          = $(SUBLIBS) -F/Users/JuanRuelas/Qt/5.4/clang_64/lib -lcurl -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL 
 AR            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar cq
 RANLIB        = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib -s
 SED           = sed
@@ -190,7 +190,7 @@ DIST          = /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/spec_pre.prf 
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/yacc.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/lex.prf \
 		../NetworkTesterGUI/NetworkTesterGUI.pro ../NetworkTesterGUI/mainwindow.h \
-		../NetworkTesterGUI/NetworkTester.h ../NetworkTesterGUI/main.cpp \
+		../NetworkTesterGUI/networktester.h ../NetworkTesterGUI/main.cpp \
 		../NetworkTesterGUI/mainwindow.cpp
 QMAKE_TARGET  = NetworkTesterGUI
 DESTDIR       = #avoid trailing-slash linebreak
@@ -542,7 +542,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../NetworkTesterGUI/resources.qrc $(DISTDIR)/
-	$(COPY_FILE) --parents ../NetworkTesterGUI/mainwindow.h ../NetworkTesterGUI/NetworkTester.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../NetworkTesterGUI/mainwindow.h ../NetworkTesterGUI/networktester.h $(DISTDIR)/
 	$(COPY_FILE) --parents ../NetworkTesterGUI/main.cpp ../NetworkTesterGUI/mainwindow.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../NetworkTesterGUI/mainwindow.ui $(DISTDIR)/
 
@@ -713,10 +713,13 @@ mainwindow.o: ../NetworkTesterGUI/mainwindow.cpp /Users/JuanRuelas/Qt/5.4/clang_
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Versions/5/Headers/qdesktopservices.h \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Versions/5/Headers/qvalidator.h \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Versions/5/Headers/qtguiversion.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/QInputDialog \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/qinputdialog.h \
 		../NetworkTesterGUI/mainwindow.h \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/QMainWindow \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/qmainwindow.h \
-		ui_mainwindow.h
+		ui_mainwindow.h \
+		../NetworkTesterGUI/networktester.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../NetworkTesterGUI/mainwindow.cpp
 
 qrc_resources.o: qrc_resources.cpp 

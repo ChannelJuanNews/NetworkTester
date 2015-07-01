@@ -16,6 +16,8 @@ SOURCES += main.cpp\
         mainwindow.cpp
 
 HEADERS  += mainwindow.h \
-    NetworkTester.h
+    networktester.h
 
 FORMS    += mainwindow.ui
+LIBS += -lcurl
+QMAKE_CXXFLAGS += -std=c++11

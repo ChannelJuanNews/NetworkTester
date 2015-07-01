@@ -24,10 +24,10 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
-#include <QtWidgets/QScrollArea>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
 
@@ -59,8 +59,6 @@ public:
     QLineEdit *UsernameEdit;
     QLineEdit *PasswordEdit;
     QFrame *LeftLine;
-    QScrollArea *LogScrollArea;
-    QWidget *scrollAreaWidgetContents;
     QFrame *TopLine;
     QFrame *RightLine;
     QFrame *BottomLine;
@@ -75,6 +73,8 @@ public:
     QLabel *label;
     QLabel *LogoLabel;
     QLabel *RequestCounterLabel;
+    QTextEdit *LogMessage;
+    QLabel *CopyrightEQ;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -83,13 +83,15 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
+        MainWindow->setWindowModality(Qt::WindowModal);
         MainWindow->setEnabled(true);
-        MainWindow->resize(818, 623);
+        MainWindow->resize(818, 644);
+        MainWindow->setMaximumSize(QSize(818, 644));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         progressBar = new QProgressBar(centralWidget);
         progressBar->setObjectName(QStringLiteral("progressBar"));
-        progressBar->setGeometry(QRect(10, 550, 781, 23));
+        progressBar->setGeometry(QRect(10, 560, 781, 23));
         progressBar->setValue(24);
         ConnectionInfo = new QGroupBox(centralWidget);
         ConnectionInfo->setObjectName(QStringLiteral("ConnectionInfo"));
@@ -172,14 +174,6 @@ public:
         LeftLine->setGeometry(QRect(429, 20, 41, 521));
         LeftLine->setFrameShape(QFrame::VLine);
         LeftLine->setFrameShadow(QFrame::Sunken);
-        LogScrollArea = new QScrollArea(centralWidget);
-        LogScrollArea->setObjectName(QStringLiteral("LogScrollArea"));
-        LogScrollArea->setGeometry(QRect(10, 110, 421, 401));
-        LogScrollArea->setWidgetResizable(true);
-        scrollAreaWidgetContents = new QWidget();
-        scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 419, 399));
-        LogScrollArea->setWidget(scrollAreaWidgetContents);
         TopLine = new QFrame(centralWidget);
         TopLine->setObjectName(QStringLiteral("TopLine"));
         TopLine->setGeometry(QRect(450, 10, 361, 21));
@@ -209,7 +203,7 @@ public:
         ApplyChangesButton->setGeometry(QRect(460, 510, 331, 32));
         StopLoggingButton = new QPushButton(centralWidget);
         StopLoggingButton->setObjectName(QStringLiteral("StopLoggingButton"));
-        StopLoggingButton->setGeometry(QRect(4, 520, 431, 32));
+        StopLoggingButton->setGeometry(QRect(4, 520, 441, 32));
         lcdNumber = new QLCDNumber(centralWidget);
         lcdNumber->setObjectName(QStringLiteral("lcdNumber"));
         lcdNumber->setGeometry(QRect(140, 80, 61, 23));
@@ -230,6 +224,16 @@ public:
         RequestCounterLabel = new QLabel(centralWidget);
         RequestCounterLabel->setObjectName(QStringLiteral("RequestCounterLabel"));
         RequestCounterLabel->setGeometry(QRect(10, 80, 121, 20));
+        LogMessage = new QTextEdit(centralWidget);
+        LogMessage->setObjectName(QStringLiteral("LogMessage"));
+        LogMessage->setGeometry(QRect(10, 110, 431, 401));
+        QFont font2;
+        font2.setPointSize(10);
+        LogMessage->setFont(font2);
+        LogMessage->setReadOnly(false);
+        CopyrightEQ = new QLabel(centralWidget);
+        CopyrightEQ->setObjectName(QStringLiteral("CopyrightEQ"));
+        CopyrightEQ->setGeometry(QRect(10, 570, 101, 41));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -269,6 +273,7 @@ public:
         label->setText(QApplication::translate("MainWindow", "Email:", 0));
         LogoLabel->setText(QString());
         RequestCounterLabel->setText(QApplication::translate("MainWindow", "Request Counter:", 0));
+        CopyrightEQ->setText(QApplication::translate("MainWindow", "\302\251 EquipoVision", 0));
     } // retranslateUi
 
 };

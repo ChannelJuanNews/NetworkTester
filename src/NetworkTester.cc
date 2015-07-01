@@ -13,6 +13,7 @@ using std::endl;
 #include <fstream>
 using std::ifstream;
 #include <string>
+using std::string;
 #include <string.h>
 #include <cstring>
 #include <cstdlib>
@@ -597,16 +598,16 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 		
 		//* for now PARAMS: filename, url, username, password, database */
 		/* every 6 hours send data to mysql database*/			
-		if((hour%6) == 0 && SendToDatabase){
+		/*if((hour%6) == 0 && SendToDatabase){
 			cout << "NOW IS THE TIME" << endl;
 			SendToDatabase = false; // that way it only uploads once!
-			//ERROR CODES BELOW:
+			*///ERROR CODES BELOW:
 			// 0) file sent, delete file and create new one
 			// 1) error sending file. don't delete file, but keep logging
 			// 2) some other error need to see whats up
 			// send_to_mysql_database(std::string fileName, std::string url, std::string user, std::string pass, std::string database){
 			/*if returns 0 there was an error*/
-			if(send_to_mysql_database(outfile, "", "", "", "") == 0){
+			/*if(send_to_mysql_database(outfile, "", "", "", "") == 0){
 				// success, delete the CSV file
 				// create new file with the same name
 				outputfileStream.close();
@@ -629,7 +630,7 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 				perror("there was some unforseen error sending data to mysql database");
 				continue;
 			}
-		}
+		}*/
 	}
 	//=====================================
 	// cleanup the curl stuff

@@ -14,6 +14,7 @@ class MainWindow : public QMainWindow{
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void sendMessage(QString message);
 
 private slots:
 
@@ -46,13 +47,15 @@ private slots:
     void on_UsernameEdit_textChanged(const QString &arg1);
     void on_DatabaseEdit_textChanged(const QString &arg1);
     void on_PasswordEdit_textChanged(const QString &arg1);
-
-
-
     void on_EmailEdit_textChanged(const QString &arg1);
+
 
 private:
     Ui::MainWindow * ui;
+    /*Execute Function*/
+    void executeStuff();
+
+
 };
 
 #endif // MAINWINDOW_H
