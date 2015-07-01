@@ -14,7 +14,7 @@ CC            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefau
 CXX           = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 DEFINES       = -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
-CXXFLAGS      = -pipe -std=c++11 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
+CXXFLAGS      = -pipe -std=c++11 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -std=c++11 -stdlib=libc++ -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
 INCPATH       = -I../NetworkTesterGUI -I. -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Versions/5/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AGL.framework/Headers -I. -I/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/macx-clang -F/Users/JuanRuelas/Qt/5.4/clang_64/lib
 QMAKE         = /Users/JuanRuelas/Qt/5.4/clang_64/bin/qmake
 DEL_FILE      = rm -f
@@ -35,7 +35,7 @@ COMPRESS      = gzip -9f
 DISTNAME      = NetworkTesterGUI1.0.0
 DISTDIR = /Users/JuanRuelas/Desktop/Projects/NetworkTester/QtGUI/NetworkTesterGUI/.tmp/NetworkTesterGUI1.0.0
 LINK          = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
-LFLAGS        = -headerpad_max_install_names -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -mmacosx-version-min=10.7 -Wl,-rpath,/Users/JuanRuelas/Qt/5.4/clang_64/lib
+LFLAGS        = -headerpad_max_install_names -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -stdlib=libc++ -mmacosx-version-min=10.7 -Wl,-rpath,/Users/JuanRuelas/Qt/5.4/clang_64/lib
 LIBS          = $(SUBLIBS) -F/Users/JuanRuelas/Qt/5.4/clang_64/lib -lcurl -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL 
 AR            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar cq
 RANLIB        = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib -s
@@ -174,6 +174,7 @@ DIST          = /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/spec_pre.prf 
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/default_pre.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/resolve_config.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/default_post.prf \
+		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/c++11.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/sdk.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/default_post.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/objective_c.prf \
@@ -201,6 +202,8 @@ QMAKE_COMP_QMAKE_OBJECTIVE_CFLAGS = -pipe \
 		-g \
 		-isysroot \
 		/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk \
+		-std=c++11 \
+		-stdlib=libc++ \
 		-mmacosx-version-min=10.7 \
 		-Wall \
 		-W
@@ -352,6 +355,7 @@ Makefile: ../NetworkTesterGUI/NetworkTesterGUI.pro /Users/JuanRuelas/Qt/5.4/clan
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/default_pre.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/resolve_config.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/default_post.prf \
+		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/c++11.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/sdk.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/default_post.prf \
 		/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/objective_c.prf \
@@ -492,6 +496,7 @@ Makefile: ../NetworkTesterGUI/NetworkTesterGUI.pro /Users/JuanRuelas/Qt/5.4/clan
 /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/default_pre.prf:
 /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/resolve_config.prf:
 /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/default_post.prf:
+/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/c++11.prf:
 /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/sdk.prf:
 /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/default_post.prf:
 /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/mac/objective_c.prf:
@@ -572,7 +577,10 @@ compiler_rcc_make_all: qrc_resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_resources.cpp
 qrc_resources.cpp: ../NetworkTesterGUI/resources.qrc \
-		../NetworkTesterGUI/images/NetworkTesterLogo.png
+		../NetworkTesterGUI/images/NetworkTesterLogo.png \
+		../NetworkTesterGUI/images/ScreenSplash.png \
+		../NetworkTesterGUI/images/loading.gif \
+		../NetworkTesterGUI/images/SplashScreen.png
 	/Users/JuanRuelas/Qt/5.4/clang_64/bin/rcc -name resources ../NetworkTesterGUI/resources.qrc -o qrc_resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp
@@ -607,7 +615,11 @@ main.o: ../NetworkTesterGUI/main.cpp ../NetworkTesterGUI/mainwindow.h \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/QMainWindow \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/qmainwindow.h \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/QApplication \
-		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/qapplication.h
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/qapplication.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/QSplashScreen \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/qsplashscreen.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Versions/5/Headers/QTimer \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Versions/5/Headers/qtimer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../NetworkTesterGUI/main.cpp
 
 mainwindow.o: ../NetworkTesterGUI/mainwindow.cpp /Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/QMessageBox \

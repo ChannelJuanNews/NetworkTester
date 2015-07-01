@@ -21,3 +21,4 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 LIBS += -lcurl
 QMAKE_CXXFLAGS += -std=c++11
+CONFIG += c++11

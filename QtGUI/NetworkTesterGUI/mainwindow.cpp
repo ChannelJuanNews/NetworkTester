@@ -121,6 +121,11 @@ void MainWindow::executeStuff(){
     InitializeNetworkTester(this,AttemptingDomain, NameOfComputer, RequestInterval, TimeoutValue, HOST, USERNAME, DATABASE, PASSWORD, email);
     loggingStarted = true;
 }
+
+void MainWindow::stopExecution(){
+    stopThread(); // sets terminate thread flag to true
+}
+
 //=====================
 /*Signal Handlers*/
 //=====================
@@ -300,7 +305,7 @@ void MainWindow::on_StopLoggingButton_clicked(){
                 msgBox2.setText("You have stopped logging");
                 msgBox2.exec();
                 loggingStarted = false;
-                //std::cout << " WE STOPPED LOGGING!" << std::endl;
+                stopExecution();
                 sendMessage(" We have stopped logging");
                 break;
             case QMessageBox::No:
@@ -333,6 +338,7 @@ void MainWindow::on_ApplyChangesButton_clicked(){
             case QMessageBox::Yes:
                 msgBox2.setText("Your changes have been applied");
                 msgBox2.exec();
+                stopExecution();
                 executeStuff();
                 sendMessage("Logging started\n");
                 break;

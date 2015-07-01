@@ -23,6 +23,7 @@ using std::string;
 using std::setw;
 using std::left;
 #include <vector>
+#include <thread>
 
 
 /*c++ cURL library includes*/
@@ -269,6 +270,7 @@ std::string getCurrentTime(std::string & currTime){
     return currTime;
 }
 
+bool StopThread;
 void http_get_request(const std::string & name, const std::string & domain, unsigned & interval, unsigned & timeout){
 
     CURL * curl = curl_easy_init(); // intialize curl
@@ -276,6 +278,12 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
     std::ofstream outputfileStream; // declares an output stream
     std::string outfile = name + "REQUESTS.csv"; // appends `REQUESTS,txt` to file name
     outputfileStream.open(outfile.c_str()); // creates an outfile with `REQUESTS.txt` extension in current directory
+    if(outputfileStream.is_open()){
+        cout << "you have opened the file successfully!";
+    }
+    else {
+        cout << "FILE NOT OPENED!";
+    }
     unsigned counter = 1; // counter that will keep track of number of http requests sent
     //time_t ltime; /* calendar time */
     //ltime=time(NULL); /* get current cal time */
@@ -287,6 +295,14 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
 
     // ill put condition here to check for web flags later
     while(check_remote_server(timeout)){
+
+        if(StopThread){
+            StopThread = false;
+            outputfileStream.close();
+            return;
+        }
+
+        QString ConsoleMessageString = "";
 
         char * localIP; // = '\0'; // char * that stores the local IP address
         char * primaryIP; // = '\0'; // char * that sores the primary IP address
@@ -545,9 +561,24 @@ void http_get_request(const std::string & name, const std::string & domain, unsi
     curl_easy_cleanup(curl); // cleans up curl
 }
 
-void foo(){
+// GOLBAL VARIABLES
+MainWindow * uI;
+string Domain;
+string Name;
+unsigned Interval;
+unsigned Timeout;
+string Host;
+string User;
+string Database;
+string Password;
+string Email;
 
-    mySleep(10);
+void beginThread(){
+    http_get_request(Name, Domain, Interval, Timeout);
+}
+void stopThread(){
+   StopThread = true;
+   return;
 }
 
 void InitializeNetworkTester(MainWindow * ui, string domain, string name, string interval,
@@ -555,7 +586,21 @@ void InitializeNetworkTester(MainWindow * ui, string domain, string name, string
     string fileName = name + "REQUESTS.csv";
     unsigned INTERVAL = atoi(interval.c_str());
     unsigned TIMEOUT = atoi(timeout.c_str());
-    //http_get_request(fileName,domain, INTERVAL, TIMEOUT);
+
+    uI = ui;
+    Domain = domain;
+    Name = name;
+    Interval = INTERVAL;
+    Timeout = TIMEOUT;
+    Host = host;
+    User = user;
+    Database = database;
+    Password = password;
+    Email = email;
+
+    StopThread = false;
+    std::thread thread1(beginThread);
+    thread1.detach();
     return;
 }
 

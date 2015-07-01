@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/resources">
         <file>images/NetworkTesterLogo.png</file>
+        <file>images/SplashScreen.png</file>
+        <file>images/loading.gif</file>
+        <file>images/ScreenSplash.png</file>
     </qresource>
 </RCC>

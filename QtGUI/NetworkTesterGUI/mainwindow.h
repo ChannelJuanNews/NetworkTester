@@ -54,6 +54,7 @@ private:
     Ui::MainWindow * ui;
     /*Execute Function*/
     void executeStuff();
+    void stopExecution();
 
 
 };
