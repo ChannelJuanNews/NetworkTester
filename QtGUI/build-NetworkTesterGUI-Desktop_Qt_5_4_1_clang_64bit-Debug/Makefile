@@ -12,10 +12,10 @@ MAKEFILE      = Makefile
 
 CC            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
 CXX           = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
-DEFINES       = -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
+DEFINES       = -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
-CXXFLAGS      = -pipe -std=c++11 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -std=c++11 -stdlib=libc++ -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
-INCPATH       = -I../NetworkTesterGUI -I. -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Versions/5/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AGL.framework/Headers -I. -I/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/macx-clang -F/Users/JuanRuelas/Qt/5.4/clang_64/lib
+CXXFLAGS      = -pipe -std=c++11 `mysql_config --cflags` `mysql_config --libs` -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -std=c++11 -stdlib=libc++ -mmacosx-version-min=10.7 -Wall -W -fPIE $(DEFINES)
+INCPATH       = -I../NetworkTesterGUI -I. -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Versions/5/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/OpenGL.framework/Versions/A/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AGL.framework/Headers -I. -I/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/macx-clang -F/Users/JuanRuelas/Qt/5.4/clang_64/lib
 QMAKE         = /Users/JuanRuelas/Qt/5.4/clang_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -36,7 +36,7 @@ DISTNAME      = NetworkTesterGUI1.0.0
 DISTDIR = /Users/JuanRuelas/Desktop/Projects/NetworkTester/QtGUI/NetworkTesterGUI/.tmp/NetworkTesterGUI1.0.0
 LINK          = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 LFLAGS        = -headerpad_max_install_names -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -stdlib=libc++ -mmacosx-version-min=10.7 -Wl,-rpath,/Users/JuanRuelas/Qt/5.4/clang_64/lib
-LIBS          = $(SUBLIBS) -F/Users/JuanRuelas/Qt/5.4/clang_64/lib -lcurl -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL 
+LIBS          = $(SUBLIBS) -F/Users/JuanRuelas/Qt/5.4/clang_64/lib -lcurl -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework QtSql -framework OpenGL -framework AGL 
 AR            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar cq
 RANLIB        = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib -s
 SED           = sed
@@ -375,7 +375,8 @@ Makefile: ../NetworkTesterGUI/NetworkTesterGUI.pro /Users/JuanRuelas/Qt/5.4/clan
 		../NetworkTesterGUI/resources.qrc \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/QtWidgets.prl \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/QtGui.prl \
-		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/QtCore.prl
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/QtCore.prl \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/QtSql.prl
 	$(QMAKE) -spec macx-clang CONFIG+=debug CONFIG+=x86_64 -o Makefile ../NetworkTesterGUI/NetworkTesterGUI.pro
 /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/features/spec_pre.prf:
 /Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/qdevice.pri:
@@ -517,6 +518,7 @@ Makefile: ../NetworkTesterGUI/NetworkTesterGUI.pro /Users/JuanRuelas/Qt/5.4/clan
 /Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/QtWidgets.prl:
 /Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/QtGui.prl:
 /Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/QtCore.prl:
+/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/QtSql.prl:
 qmake: FORCE
 	@$(QMAKE) -spec macx-clang CONFIG+=debug CONFIG+=x86_64 -o Makefile ../NetworkTesterGUI/NetworkTesterGUI.pro
 
@@ -577,6 +579,8 @@ compiler_rcc_make_all: qrc_resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_resources.cpp
 qrc_resources.cpp: ../NetworkTesterGUI/resources.qrc \
+		../NetworkTesterGUI/MainWindow2Form.ui.qml \
+		../NetworkTesterGUI/MainWindow2.qml \
 		../NetworkTesterGUI/images/NetworkTesterLogo.png \
 		../NetworkTesterGUI/images/ScreenSplash.png \
 		../NetworkTesterGUI/images/loading.gif \
@@ -589,7 +593,7 @@ compiler_moc_header_clean:
 moc_mainwindow.cpp: /Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/QMainWindow \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/qmainwindow.h \
 		../NetworkTesterGUI/mainwindow.h
-	/Users/JuanRuelas/Qt/5.4/clang_64/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -I/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/macx-clang -I/Users/JuanRuelas/Desktop/Projects/NetworkTester/QtGUI/NetworkTesterGUI -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Headers -I. -F/Users/JuanRuelas/Qt/5.4/clang_64/lib ../NetworkTesterGUI/mainwindow.h -o moc_mainwindow.cpp
+	/Users/JuanRuelas/Qt/5.4/clang_64/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -I/Users/JuanRuelas/Qt/5.4/clang_64/mkspecs/macx-clang -I/Users/JuanRuelas/Desktop/Projects/NetworkTester/QtGUI/NetworkTesterGUI -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtGui.framework/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Headers -I/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Headers -I. -F/Users/JuanRuelas/Qt/5.4/clang_64/lib ../NetworkTesterGUI/mainwindow.h -o moc_mainwindow.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -731,7 +735,26 @@ mainwindow.o: ../NetworkTesterGUI/mainwindow.cpp /Users/JuanRuelas/Qt/5.4/clang_
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/QMainWindow \
 		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtWidgets.framework/Versions/5/Headers/qmainwindow.h \
 		ui_mainwindow.h \
-		../NetworkTesterGUI/networktester.h
+		../NetworkTesterGUI/networktester.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/QtSql \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsql.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqldatabase.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqldriver.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqldriverplugin.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlerror.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlfield.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlindex.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlquery.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlrecord.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlresult.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlquerymodel.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlrelationaldelegate.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqlrelationaltablemodel.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qsqltablemodel.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/qtsqlversion.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Versions/5/Headers/QtDebug \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtCore.framework/Versions/5/Headers/qdebug.h \
+		/Users/JuanRuelas/Qt/5.4/clang_64/lib/QtSql.framework/Versions/5/Headers/QSql
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../NetworkTesterGUI/mainwindow.cpp
 
 qrc_resources.o: qrc_resources.cpp 

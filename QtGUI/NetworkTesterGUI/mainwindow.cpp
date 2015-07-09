@@ -2,6 +2,7 @@
 #include <QPixmap>
 #include <QtGui>
 #include <QInputDialog>
+#include <QFileDialog>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <iostream>
@@ -21,33 +22,51 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->progressBar->setValue(0); // set progress bar to 0
     ui->NameEdit->setPlaceholderText("Fulano"); // example name inside of line
     ui->DomainEdit->setPlaceholderText("google.com"); // example domain inside of line
+    ui->DomainEdit->setText("google.com");
     ui->HostEdit->setPlaceholderText("localhost");
-    ui->UsernameEdit->setPlaceholderText("ChannelJuan");
+    ui->UsernameEdit->setPlaceholderText("Username");
     ui->DatabaseEdit->setPlaceholderText("test");
     ui->PasswordEdit->setPlaceholderText("********");
     ui->EmailEdit->setPlaceholderText("example@email.com");
     ui->DisplayLogsCheck->setChecked(true); // by default sets as a check
+    ui->LocationEdit->setReadOnly(true);
+    //ui->EmailEdit->setReadOnly(true);
 
     // set LogMessage background color
     QPalette p = ui->LogMessage->palette();
     p.setColor(QPalette::Base, QColor(240, 240, 255));
     ui->LogMessage->setPalette(p);
-
     ui->LogMessage->setAcceptDrops(false); //
     ui->LogMessage->setEnabled(false); // makes is so you can't edit the logs
     ui->LogMessage->setTextColor(QColor(0,0,255,127)); // makes a semi-transparent blue
     ui->LogMessage->setStyleSheet("QTextEdit { padding-left:5; padding-top:5; padding-bottom:5; padding-right:5}");
+    ui->NumFailures->setSegmentStyle(QLCDNumber::Filled);
 
-
+    // SET LCD WIGETS TO LOOK GOOD
+    /* get the palette */
+    QPalette palette = ui->NumFailures->palette();
+    /* foreground color */
+    palette.setColor(palette.WindowText, QColor(10,10, 255));
+    /* background color */
+    palette.setColor(palette.Background, QColor(240, 240, 255));
+    /* "light" border */
+    palette.setColor(palette.Light, QColor(0, 0, 0));
+    /* "dark" border */
+    palette.setColor(palette.Dark, QColor(0, 0,0));
+    /* set the palettes */
+    ui->NumFailures->setPalette(palette);
+    ui->NumFailures->setSegmentStyle(QLCDNumber::Filled);
+    /* set second palette */
+    ui->TimeDisplay->setPalette(palette);
+    ui->TimeDisplay->setSegmentStyle(QLCDNumber::Filled);
 }
-
 MainWindow::~MainWindow(){
     delete ui;
+    ui = NULL;
 }
 void MainWindow::sendMessage(QString message){
     QString cat = ui->LogMessage->toPlainText();
     ui->LogMessage->setText(message + cat);
-    std::cout << "we are here" << std::endl;
 }
 /*GLOBAL VARIABLES TO ORQUESTRATE THE GUI*/
 //====================================
@@ -58,18 +77,22 @@ std::string TimeoutValue = ""; //NOTNULL
 std::string HOST = ""; //NOTNULL
 std::string USERNAME = ""; //NOTNULL
 std::string DATABASE = ""; // NOTNULL
-
 std::string PASSWORD = ""; // can be null
 std::string email = ""; // can be null
+std::string SaveDirectory = ""; // CANNOT BE NULL
+
+std::thread * SecondThread;
 
 bool loggingStarted = false;
 bool displayLogs = true;
 bool NotifyEmail = false;
 //=====================================
 
+
 /* function that executes the actual program*/
 void MainWindow::executeStuff(){
     // check to see if the inputted stuff is valid
+
     QMessageBox msgBox;
     if(AttemptingDomain == ""){
         msgBox.setText("Domain is not valid");
@@ -116,9 +139,16 @@ void MainWindow::executeStuff(){
     if(NotifyEmail){
         email = ui->EmailEdit->text().toStdString();
     }
-    //std::cout << "The email is: " << email << std::endl;
-    //std::cout << "WE ARE ABOUT TO RUN THE MAIN PROGRAM!!" << std::endl;
-    InitializeNetworkTester(this,AttemptingDomain, NameOfComputer, RequestInterval, TimeoutValue, HOST, USERNAME, DATABASE, PASSWORD, email);
+    if(SaveDirectory == ""){
+        QMessageBox msgBox;
+        msgBox.setText("Please specify a save location");
+        msgBox.exec();
+        return;
+    }
+
+    SecondThread = InitializeNetworkTester(this,AttemptingDomain, NameOfComputer, RequestInterval,
+                            TimeoutValue, HOST, USERNAME, DATABASE, PASSWORD, email,
+                            SaveDirectory, ui->LogMessage);
     loggingStarted = true;
 }
 
@@ -136,7 +166,7 @@ void MainWindow::on_progressBar_valueChanged(int value){
     }
 }
 
-//** TEXT BOXES ****
+/****************** TEXT BOXES *****************************/
 void MainWindow::on_DomainEdit_textChanged(const QString &arg1){
     QString input = ui->DomainEdit->text();
     AttemptingDomain = input.toStdString();
@@ -165,7 +195,7 @@ void MainWindow::on_EmailEdit_textChanged(const QString &arg1){
 
 }
 
-//******** REQUEST SLIDER AND BOX ******
+//******** REQEUST AND TIMEOUT SILDERS AND BOXES  *************
 int REQUESTSLIDERGLOBAL = 0; // request slider global variable
 void MainWindow::on_RequestTimeBox_valueChanged(const QString &arg1){
     REQUESTSLIDERGLOBAL = ui->RequestTimeBox->value();
@@ -195,7 +225,6 @@ void MainWindow::on_RequestSlider_sliderPressed(){
     RequestInterval = ss.str();
 }
 
-//************TIMEOUT SLIDER AND BOX ***********
 int TIMEOUTSLIDERGLOBAL = 0;
 void MainWindow::on_TimeoutTimeBox_valueChanged(const QString &arg1){
     TIMEOUTSLIDERGLOBAL = ui->TimeoutTimeBox->value();
@@ -225,8 +254,7 @@ void MainWindow::on_TimeoutSlider_sliderPressed(){
     TimeoutValue = ss.str();
 }
 
-
-//**** CHECKBOXES *******
+/************************ CHECKBOXES ***********************/
 void MainWindow::on_DisplayLogsCheck_clicked(bool checked){
     if(!ui->DisplayLogsCheck->isChecked()){
         QMessageBox msgBox;
@@ -271,7 +299,8 @@ void MainWindow::on_AlertIfErrorCheckBox_clicked(){
     }
     else {
         bool ok;
-        QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"), tr("Email:"), QLineEdit::Normal, QDir::home().dirName(), &ok);
+        QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"),
+                       tr("Email:"), QLineEdit::Normal, QDir::home().dirName(), &ok);
             if (ok && !text.isEmpty()){
                 ui->EmailEdit->setText(text);
                 email = ui->EmailEdit->text().toStdString();
@@ -285,7 +314,7 @@ void MainWindow::on_AlertIfErrorCheckBox_clicked(){
             }
     }
 }
-//**** BUTTONS ******
+/********************* Apply changes and Stop logging Buttons ***************/
 void MainWindow::on_StopLoggingButton_clicked(){
     QMessageBox msgBox;
     if(loggingStarted == false){
@@ -306,7 +335,7 @@ void MainWindow::on_StopLoggingButton_clicked(){
                 msgBox2.exec();
                 loggingStarted = false;
                 stopExecution();
-                sendMessage(" We have stopped logging");
+                sendMessage("You have stopped logging\n");
                 break;
             case QMessageBox::No:
                 // do nothing
@@ -319,7 +348,9 @@ void MainWindow::on_StopLoggingButton_clicked(){
 
 void MainWindow::on_ApplyChangesButton_clicked(){
     QMessageBox msgBox;
-    if(AttemptingDomain == "" || NameOfComputer == "" || RequestInterval == "" || TimeoutValue == "" || HOST == "" || USERNAME == "" || DATABASE == ""){
+    if(AttemptingDomain == "" || NameOfComputer == "" || RequestInterval == ""
+                              || TimeoutValue == "" || HOST == "" || USERNAME == ""
+                              || DATABASE == "" || SaveDirectory == ""){
         msgBox.setText("You need to provide valid information");
         msgBox.exec();
     }
@@ -340,6 +371,8 @@ void MainWindow::on_ApplyChangesButton_clicked(){
                 msgBox2.exec();
                 stopExecution();
                 executeStuff();
+                ui->TimeDisplay->display(0);
+                ui->NumFailures->display(0);
                 sendMessage("Logging started\n");
                 break;
             case QMessageBox::No:
@@ -350,5 +383,18 @@ void MainWindow::on_ApplyChangesButton_clicked(){
     }
 }
 
+/******************* Specify Location Box *****************************/
+void MainWindow::on_LocationEdit_textChanged(const QString &arg1){
+    // does nothing since user will not be ale to edit text
+}
+void MainWindow::on_BrowseButton_clicked(){
+    QString directory = QFileDialog::getExistingDirectory(this, tr("Destination Folder"), "~/");
 
-
+    if(directory == ""){
+        ui->LocationEdit->setText("");
+    }
+    else {
+        ui->LocationEdit->setText(directory);
+    }
+    SaveDirectory = directory.toStdString();
+}

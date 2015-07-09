@@ -49,8 +49,12 @@ private slots:
     void on_PasswordEdit_textChanged(const QString &arg1);
     void on_EmailEdit_textChanged(const QString &arg1);
 
+    /*Set Directory*/
+    void on_LocationEdit_textChanged(const QString &arg1);
+    void on_BrowseButton_clicked();
 
 private:
+
     Ui::MainWindow * ui;
     /*Execute Function*/
     void executeStuff();

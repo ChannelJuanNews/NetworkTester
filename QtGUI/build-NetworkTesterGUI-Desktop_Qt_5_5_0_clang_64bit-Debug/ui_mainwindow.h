@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.4.1
+** Created by: Qt User Interface Compiler version 5.5.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -14,7 +14,6 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
-#include <QtWidgets/QFrame>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLCDNumber>
@@ -58,28 +57,24 @@ public:
     QLineEdit *DatabaseEdit;
     QLineEdit *UsernameEdit;
     QLineEdit *PasswordEdit;
-    QFrame *LeftLine;
-    QFrame *TopLine;
-    QFrame *RightLine;
-    QFrame *BottomLine;
     QGroupBox *Additionalinfo;
     QCheckBox *DisplayLogsCheck;
     QCheckBox *AlertIfErrorCheckBox;
     QPushButton *ApplyChangesButton;
     QPushButton *StopLoggingButton;
     QLCDNumber *TimeDisplay;
-    QGroupBox *groupBox;
+    QGroupBox *EmailBox;
     QLineEdit *EmailEdit;
     QLabel *EmailLabel;
-    QLabel *LogoLabel;
     QLabel *CurrentTimeLabel;
     QTextEdit *LogMessage;
     QLabel *CopyrightEQ;
     QGroupBox *SpecifyBox;
-    QLabel *label_2;
+    QLabel *LocationLabel;
     QPushButton *BrowseButton;
     QLineEdit *LocationEdit;
     QLabel *NumFailuresLabel;
+    QLabel *NetworkTesterLogoLabel;
     QLCDNumber *NumFailures;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
@@ -91,18 +86,18 @@ public:
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
         MainWindow->setEnabled(true);
-        MainWindow->resize(820, 644);
-        MainWindow->setMinimumSize(QSize(820, 644));
-        MainWindow->setMaximumSize(QSize(820, 644));
+        MainWindow->resize(810, 644);
+        MainWindow->setMinimumSize(QSize(810, 644));
+        MainWindow->setMaximumSize(QSize(810, 644));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         progressBar = new QProgressBar(centralWidget);
         progressBar->setObjectName(QStringLiteral("progressBar"));
-        progressBar->setGeometry(QRect(10, 560, 781, 23));
+        progressBar->setGeometry(QRect(10, 560, 791, 23));
         progressBar->setValue(24);
         ConnectionInfo = new QGroupBox(centralWidget);
         ConnectionInfo->setObjectName(QStringLiteral("ConnectionInfo"));
-        ConnectionInfo->setGeometry(QRect(460, 30, 331, 151));
+        ConnectionInfo->setGeometry(QRect(460, 60, 331, 141));
         DomainEdit = new QLineEdit(ConnectionInfo);
         DomainEdit->setObjectName(QStringLiteral("DomainEdit"));
         DomainEdit->setGeometry(QRect(10, 110, 113, 21));
@@ -151,7 +146,7 @@ public:
         TimeoutTimeBox->setGeometry(QRect(276, 110, 51, 24));
         MySQLinfo = new QGroupBox(centralWidget);
         MySQLinfo->setObjectName(QStringLiteral("MySQLinfo"));
-        MySQLinfo->setGeometry(QRect(460, 180, 331, 121));
+        MySQLinfo->setGeometry(QRect(460, 200, 331, 121));
         HostLabel = new QLabel(MySQLinfo);
         HostLabel->setObjectName(QStringLiteral("HostLabel"));
         HostLabel->setGeometry(QRect(30, 20, 59, 16));
@@ -176,29 +171,9 @@ public:
         PasswordEdit = new QLineEdit(MySQLinfo);
         PasswordEdit->setObjectName(QStringLiteral("PasswordEdit"));
         PasswordEdit->setGeometry(QRect(170, 90, 113, 21));
-        LeftLine = new QFrame(centralWidget);
-        LeftLine->setObjectName(QStringLiteral("LeftLine"));
-        LeftLine->setGeometry(QRect(429, 20, 41, 521));
-        LeftLine->setFrameShape(QFrame::VLine);
-        LeftLine->setFrameShadow(QFrame::Sunken);
-        TopLine = new QFrame(centralWidget);
-        TopLine->setObjectName(QStringLiteral("TopLine"));
-        TopLine->setGeometry(QRect(450, 10, 361, 21));
-        TopLine->setFrameShape(QFrame::HLine);
-        TopLine->setFrameShadow(QFrame::Sunken);
-        RightLine = new QFrame(centralWidget);
-        RightLine->setObjectName(QStringLiteral("RightLine"));
-        RightLine->setGeometry(QRect(800, 20, 20, 521));
-        RightLine->setFrameShape(QFrame::VLine);
-        RightLine->setFrameShadow(QFrame::Sunken);
-        BottomLine = new QFrame(centralWidget);
-        BottomLine->setObjectName(QStringLiteral("BottomLine"));
-        BottomLine->setGeometry(QRect(450, 520, 361, 51));
-        BottomLine->setFrameShape(QFrame::HLine);
-        BottomLine->setFrameShadow(QFrame::Sunken);
         Additionalinfo = new QGroupBox(centralWidget);
         Additionalinfo->setObjectName(QStringLiteral("Additionalinfo"));
-        Additionalinfo->setGeometry(QRect(460, 380, 331, 61));
+        Additionalinfo->setGeometry(QRect(460, 400, 331, 61));
         DisplayLogsCheck = new QCheckBox(Additionalinfo);
         DisplayLogsCheck->setObjectName(QStringLiteral("DisplayLogsCheck"));
         DisplayLogsCheck->setGeometry(QRect(20, 30, 101, 20));
@@ -207,35 +182,30 @@ public:
         AlertIfErrorCheckBox->setGeometry(QRect(130, 30, 141, 20));
         ApplyChangesButton = new QPushButton(centralWidget);
         ApplyChangesButton->setObjectName(QStringLiteral("ApplyChangesButton"));
-        ApplyChangesButton->setGeometry(QRect(460, 510, 331, 32));
+        ApplyChangesButton->setGeometry(QRect(450, 520, 351, 32));
         StopLoggingButton = new QPushButton(centralWidget);
         StopLoggingButton->setObjectName(QStringLiteral("StopLoggingButton"));
         StopLoggingButton->setGeometry(QRect(4, 520, 441, 32));
         TimeDisplay = new QLCDNumber(centralWidget);
         TimeDisplay->setObjectName(QStringLiteral("TimeDisplay"));
-        TimeDisplay->setGeometry(QRect(100, 80, 61, 23));
+        TimeDisplay->setGeometry(QRect(550, 30, 61, 23));
         TimeDisplay->setSmallDecimalPoint(true);
         TimeDisplay->setDigitCount(6);
-        groupBox = new QGroupBox(centralWidget);
-        groupBox->setObjectName(QStringLiteral("groupBox"));
-        groupBox->setGeometry(QRect(460, 440, 331, 61));
-        EmailEdit = new QLineEdit(groupBox);
+        EmailBox = new QGroupBox(centralWidget);
+        EmailBox->setObjectName(QStringLiteral("EmailBox"));
+        EmailBox->setGeometry(QRect(460, 460, 331, 61));
+        EmailEdit = new QLineEdit(EmailBox);
         EmailEdit->setObjectName(QStringLiteral("EmailEdit"));
         EmailEdit->setGeometry(QRect(60, 30, 251, 21));
-        EmailLabel = new QLabel(groupBox);
+        EmailLabel = new QLabel(EmailBox);
         EmailLabel->setObjectName(QStringLiteral("EmailLabel"));
         EmailLabel->setGeometry(QRect(20, 30, 59, 16));
-        LogoLabel = new QLabel(centralWidget);
-        LogoLabel->setObjectName(QStringLiteral("LogoLabel"));
-        LogoLabel->setGeometry(QRect(0, 10, 441, 71));
-        LogoLabel->setPixmap(QPixmap(QString::fromUtf8(":/resources/images/NetworkTesterLogo.png")));
-        LogoLabel->setScaledContents(true);
         CurrentTimeLabel = new QLabel(centralWidget);
         CurrentTimeLabel->setObjectName(QStringLiteral("CurrentTimeLabel"));
-        CurrentTimeLabel->setGeometry(QRect(10, 80, 121, 20));
+        CurrentTimeLabel->setGeometry(QRect(460, 30, 91, 20));
         LogMessage = new QTextEdit(centralWidget);
         LogMessage->setObjectName(QStringLiteral("LogMessage"));
-        LogMessage->setGeometry(QRect(10, 110, 431, 401));
+        LogMessage->setGeometry(QRect(10, 70, 431, 441));
         QFont font2;
         font2.setPointSize(10);
         LogMessage->setFont(font2);
@@ -245,10 +215,10 @@ public:
         CopyrightEQ->setGeometry(QRect(10, 570, 101, 41));
         SpecifyBox = new QGroupBox(centralWidget);
         SpecifyBox->setObjectName(QStringLiteral("SpecifyBox"));
-        SpecifyBox->setGeometry(QRect(459, 299, 331, 81));
-        label_2 = new QLabel(SpecifyBox);
-        label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setGeometry(QRect(10, 40, 61, 21));
+        SpecifyBox->setGeometry(QRect(460, 320, 331, 81));
+        LocationLabel = new QLabel(SpecifyBox);
+        LocationLabel->setObjectName(QStringLiteral("LocationLabel"));
+        LocationLabel->setGeometry(QRect(10, 40, 61, 21));
         BrowseButton = new QPushButton(SpecifyBox);
         BrowseButton->setObjectName(QStringLiteral("BrowseButton"));
         BrowseButton->setGeometry(QRect(230, 40, 91, 21));
@@ -257,14 +227,33 @@ public:
         LocationEdit->setGeometry(QRect(70, 40, 151, 21));
         NumFailuresLabel = new QLabel(centralWidget);
         NumFailuresLabel->setObjectName(QStringLiteral("NumFailuresLabel"));
-        NumFailuresLabel->setGeometry(QRect(170, 80, 121, 16));
+        NumFailuresLabel->setGeometry(QRect(670, 30, 51, 21));
+        NetworkTesterLogoLabel = new QLabel(centralWidget);
+        NetworkTesterLogoLabel->setObjectName(QStringLiteral("NetworkTesterLogoLabel"));
+        NetworkTesterLogoLabel->setGeometry(QRect(0, 0, 451, 71));
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(NetworkTesterLogoLabel->sizePolicy().hasHeightForWidth());
+        NetworkTesterLogoLabel->setSizePolicy(sizePolicy);
+        QFont font3;
+        font3.setKerning(true);
+        NetworkTesterLogoLabel->setFont(font3);
+        NetworkTesterLogoLabel->setLineWidth(1);
+        NetworkTesterLogoLabel->setMidLineWidth(0);
+        NetworkTesterLogoLabel->setPixmap(QPixmap(QString::fromUtf8(":/resources/images/NetworkTesterLogo.png")));
+        NetworkTesterLogoLabel->setScaledContents(true);
+        NetworkTesterLogoLabel->setWordWrap(false);
+        NetworkTesterLogoLabel->setOpenExternalLinks(false);
         NumFailures = new QLCDNumber(centralWidget);
         NumFailures->setObjectName(QStringLiteral("NumFailures"));
-        NumFailures->setGeometry(QRect(300, 80, 64, 23));
+        NumFailures->setGeometry(QRect(730, 30, 61, 23));
+        NumFailures->setSmallDecimalPoint(true);
+        NumFailures->setDigitCount(6);
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 820, 22));
+        menuBar->setGeometry(QRect(0, 0, 810, 22));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -286,25 +275,28 @@ public:
         NameOfComputer->setText(QApplication::translate("MainWindow", "Name of Computer", 0));
         RequestInterval->setText(QApplication::translate("MainWindow", "Request Interval", 0));
         TimeoutValue->setText(QApplication::translate("MainWindow", "Timeout Value", 0));
-        MySQLinfo->setTitle(QApplication::translate("MainWindow", "MySQL Information", 0));
+        MySQLinfo->setTitle(QApplication::translate("MainWindow", "MySQL Connection Information", 0));
         HostLabel->setText(QApplication::translate("MainWindow", "Host", 0));
         UserNameLabel->setText(QApplication::translate("MainWindow", "Username", 0));
         DatabaseLabel->setText(QApplication::translate("MainWindow", "Database", 0));
         PasswordLabel->setText(QApplication::translate("MainWindow", "Password", 0));
-        Additionalinfo->setTitle(QApplication::translate("MainWindow", "Additional Information", 0));
+        Additionalinfo->setTitle(QApplication::translate("MainWindow", "Additional Information and Alerts", 0));
         DisplayLogsCheck->setText(QApplication::translate("MainWindow", "Display Logs", 0));
         AlertIfErrorCheckBox->setText(QApplication::translate("MainWindow", "Alert if error ocurs", 0));
         ApplyChangesButton->setText(QApplication::translate("MainWindow", "Apply Changes", 0));
         StopLoggingButton->setText(QApplication::translate("MainWindow", "Stop Logging", 0));
-        groupBox->setTitle(QApplication::translate("MainWindow", "Error Alerts", 0));
+        EmailBox->setTitle(QApplication::translate("MainWindow", "Error Alerts", 0));
         EmailLabel->setText(QApplication::translate("MainWindow", "Email:", 0));
-        LogoLabel->setText(QString());
         CurrentTimeLabel->setText(QApplication::translate("MainWindow", "Current Time:", 0));
         CopyrightEQ->setText(QApplication::translate("MainWindow", "\302\251 EquipoVision", 0));
-        SpecifyBox->setTitle(QApplication::translate("MainWindow", "Specify Save Location", 0));
-        label_2->setText(QApplication::translate("MainWindow", "Location: ", 0));
+        SpecifyBox->setTitle(QApplication::translate("MainWindow", "Specify Save Location For Log File", 0));
+        LocationLabel->setText(QApplication::translate("MainWindow", "Location: ", 0));
         BrowseButton->setText(QApplication::translate("MainWindow", "Browse", 0));
-        NumFailuresLabel->setText(QApplication::translate("MainWindow", "Number of Failures:", 0));
+        NumFailuresLabel->setText(QApplication::translate("MainWindow", "Failures:", 0));
+#ifndef QT_NO_TOOLTIP
+        NetworkTesterLogoLabel->setToolTip(QString());
+#endif // QT_NO_TOOLTIP
+        NetworkTesterLogoLabel->setText(QString());
     } // retranslateUi
 
 };

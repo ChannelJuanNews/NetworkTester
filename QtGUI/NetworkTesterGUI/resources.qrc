@@ -5,4 +5,8 @@
         <file>images/loading.gif</file>
         <file>images/ScreenSplash.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>MainWindow2.qml</file>
+        <file>MainWindow2Form.ui.qml</file>
+    </qresource>
 </RCC>
